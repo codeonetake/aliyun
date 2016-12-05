@@ -74,7 +74,10 @@ public class UploadBakController {
 		response.setCharacterEncoding("UTF-8");
 		ModelAndView modelAndView = new ModelAndView();
 		modelAndView.setViewName("bakpage");
-		//modelAndView.addObject("localCount", UploadBakService.getLocalBakCount());
+		//获取规则
+		String ruleFile = OssConfig.getValue("ruleSerFile");
+		String rule = (String) ObjSave.fileToObject(ruleFile);
+		modelAndView.addObject("rule", rule);
 		return modelAndView;
 	}
 	
@@ -93,6 +96,31 @@ public class UploadBakController {
 		PrintWriter out = response.getWriter();
 		String bakSerFile = OssConfig.getValue("bakSerFile");
 		out.write((String)ObjSave.fileToObject(bakSerFile));
+		out.flush();
+		out.close();
+	}
+	
+	@RequestMapping(value="changeRule")
+	public void changeRule(HttpServletRequest request,HttpServletResponse response) throws Exception{
+		request.setCharacterEncoding("UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		int type = Integer.parseInt(request.getParameter("type"));
+		PrintWriter out = response.getWriter();
+		String ruleSerFile = OssConfig.getValue("ruleSerFile");
+		String ruleStr = (String)ObjSave.fileToObject(ruleSerFile);
+		String[] rules = ruleStr.split("\\|");
+		if("0".equals(rules[type])){
+			rules[type] = "1";
+		}else{
+			rules[type] = "0";
+		}
+		String newRule = "";
+		for (String rule : rules) {
+			newRule += rule + "|";
+		}
+		newRule = newRule.substring(0,newRule.length() - 1);
+		ObjSave.objectToFile(newRule, ruleSerFile);
+		out.write((String)ObjSave.fileToObject(ruleSerFile));
 		out.flush();
 		out.close();
 	}

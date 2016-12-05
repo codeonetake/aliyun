@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import com.aliyun.bean.OssFile;
+import com.aliyun.bean.OssPage;
 import com.aliyun.oss.ClientConfiguration;
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.model.Bucket;
@@ -17,38 +18,58 @@ import com.aliyun.oss.model.ListObjectsRequest;
 import com.aliyun.oss.model.LocationConstraint;
 import com.aliyun.oss.model.OSSObject;
 import com.aliyun.oss.model.OSSObjectSummary;
+import com.aliyun.oss.model.ObjectListing;
 import com.aliyun.oss.model.PutObjectRequest;
 
+/**
+ * 阿里云oss基础操作类
+ * @author liuwenbin
+ *
+ */
 public class OssOperate {
+	//阿里云的endpoint，请去oss的控制台查看
 	private static String endpoint = OssConfig.getValue("endpoint");
+	//阿里云的accessKeyId和accessKeySecret
 	private static String accessKeyId = OssConfig.getValue("accessKeyId");
 	private static String accessKeySecret = OssConfig.getValue("accessKeySecret");
-	private static ClientConfiguration configuration = null;
 	
+	private static ClientConfiguration configuration = null;
 	private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	static{
+	
+	static {
 		configuration = new ClientConfiguration();
 		configuration.setConnectionTimeout(6000);
 		configuration.setConnectionRequestTimeout(6000);
 	}
 
-	public static OSSClient getClient(){
-		System.out.println("configuration:");
-		OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret, configuration);
+	/**
+	 * 获取oss客户端
+	 * @return oss客户端
+	 */
+	public static OSSClient getClient() {
+		OSSClient ossClient = new OSSClient(endpoint, accessKeyId,accessKeySecret, configuration);
 		return ossClient;
 	}
-	
+	/**
+	 * 创建bucket
+	 * @param bucketName bucket的名称
+	 * @param isPrivate 是否是私有（如果为tue，权限为私有，如果为false，权限是公共读）
+	 */
 	public static void createBucket(String bucketName, boolean isPrivate) {
 		OSSClient ossClient = null;
 		try {
 			ossClient = getClient();
-			CreateBucketRequest createBucketRequest = new CreateBucketRequest(bucketName);
+			CreateBucketRequest createBucketRequest = new CreateBucketRequest(
+					bucketName);
 			if (isPrivate) {
-				createBucketRequest.setCannedACL(CannedAccessControlList.Private);
+				createBucketRequest
+						.setCannedACL(CannedAccessControlList.Private);
 			} else {
-				createBucketRequest.setCannedACL(CannedAccessControlList.PublicRead);
+				createBucketRequest
+						.setCannedACL(CannedAccessControlList.PublicRead);
 			}
-			createBucketRequest.setLocationConstraint(LocationConstraint.OSS_CN_HONGKONG);
+			createBucketRequest
+					.setLocationConstraint(LocationConstraint.OSS_CN_HONGKONG);
 			ossClient.createBucket(createBucketRequest);
 		} finally {
 			if (null != ossClient) {
@@ -56,7 +77,10 @@ public class OssOperate {
 			}
 		}
 	}
-
+	/**
+	 * 获取所有的bucket
+	 * @return bucket对象列表
+	 */
 	public static List<Bucket> listBucket() {
 		OSSClient ossClient = null;
 		try {
@@ -68,63 +92,50 @@ public class OssOperate {
 			}
 		}
 	}
-	
-	public static List<String> getAllFiles(String bucketName,String prefix){
+	/**
+	 * 获取所有的根目录
+	 * @param bucketName bucket名称
+	 * @return 根目录文件名列表
+	 */
+	public static Set<String> getAllRootFiles(String bucketName) {
 		OSSClient ossClient = null;
-		List<String> fileNames = new ArrayList<String>();
+		Set<String> rootDirs = new TreeSet<String>();
 		try {
 			ossClient = getClient();
-			List<OSSObjectSummary> objects = ossClient.listObjects(bucketName, prefix).getObjectSummaries();
-			for (OSSObjectSummary ossObjectSummary : objects) {
-				fileNames.add(ossObjectSummary.getKey());
-			}
-		} finally {
-			if (null != ossClient) {
-				ossClient.shutdown();
-			}
-		}
-		return fileNames;
-	}
-	
-	public static void main(String[] args) {
-		List<String> keys = getAllFiles("test-codeonetake","aliyun");
-		for (String string : keys) {
-			System.out.println(string);
-		}
-	}
-	
-	public static Set<String> getAllRootFiles(String bucketName){
-		OSSClient ossClient = null;
-		Set<String> fileNames = new TreeSet<String>();
-		try {
-			ossClient = getClient();
-			ListObjectsRequest request = new ListObjectsRequest();
-			request.setBucketName(bucketName);
-			request.setMaxKeys(1000);
-			List<OSSObjectSummary> objects = ossClient.listObjects(request).getObjectSummaries();
-			String key = null;
-			for (OSSObjectSummary ossObjectSummary : objects) {
-				key = ossObjectSummary.getKey();
-				if(key.indexOf("/")!=-1){
-					fileNames.add(key.substring(0,key.indexOf("/")));
-				}else{
-					fileNames.add(key);
+			ObjectListing objectListing = null;
+			String nextMarker = null;
+			final int maxKeys = 1000;
+			String dirName = null;
+			do {
+				ListObjectsRequest listObjectsRequest = new ListObjectsRequest(bucketName).withPrefix("").withMarker(nextMarker).withMaxKeys(maxKeys);
+				objectListing = ossClient.listObjects(listObjectsRequest);
+				List<OSSObjectSummary> summrayList = objectListing.getObjectSummaries();
+				for (OSSObjectSummary ossObjectSummary : summrayList) {
+					dirName = ossObjectSummary.getKey();
+					dirName = dirName.substring(0,dirName.indexOf("/"));
+					rootDirs.add(dirName);
 				}
-			}
-		} finally {
+				nextMarker = objectListing.getNextMarker();
+			} while (objectListing.isTruncated());
+			return rootDirs;
+		}finally {
 			if (null != ossClient) {
 				ossClient.shutdown();
 			}
 		}
-		return fileNames;
 	}
-	
-	public static List<OssFile> getAllFileDetail(String bucketName,String prefix){
+	/**
+	 * 获取某前缀下所有文件详情
+	 * @param bucketName bucket名称
+	 * @param prefix 文件名前缀
+	 * @return
+	 */
+	public static List<OssFile> getAllFileDetail(String bucketName,String prefix) {
 		OSSClient ossClient = null;
 		List<OssFile> ossFiles = new ArrayList<OssFile>();
 		try {
 			ossClient = getClient();
-			List<OSSObjectSummary> objects = ossClient.listObjects(bucketName, prefix).getObjectSummaries();
+			List<OSSObjectSummary> objects = ossClient.listObjects(bucketName,prefix).getObjectSummaries();
 			OssFile ossFile = null;
 			for (OSSObjectSummary ossObjectSummary : objects) {
 				ossFile = new OssFile();
@@ -140,16 +151,22 @@ public class OssOperate {
 		}
 		return ossFiles;
 	}
-	
-	public static void uploadFile(File file,String bucketName,String fileName,boolean isPrivate){
+	/**
+	 * 上传文件
+	 * @param file 本地文件
+	 * @param bucketName bucket名称
+	 * @param fileName oss文件路径，如test/test.txt
+	 * @param isPrivate 是否是私有（为true，访问权限为私有，为false，访问权限为公共读）
+	 */
+	public static void uploadFile(File file, String bucketName,String fileName, boolean isPrivate) {
 		OSSClient ossClient = null;
 		try {
 			ossClient = getClient();
 			ossClient.putObject(new PutObjectRequest(bucketName, fileName, file));
-			if(isPrivate){
-				ossClient.setObjectAcl(bucketName, fileName, CannedAccessControlList.Private);
-			}else{
-				ossClient.setObjectAcl(bucketName, fileName, CannedAccessControlList.PublicRead);
+			if (isPrivate) {
+				ossClient.setObjectAcl(bucketName, fileName,CannedAccessControlList.Private);
+			} else {
+				ossClient.setObjectAcl(bucketName, fileName,CannedAccessControlList.PublicRead);
 			}
 		} finally {
 			if (null != ossClient) {
@@ -158,17 +175,29 @@ public class OssOperate {
 		}
 	}
 	
-	public static void uploadFile(File file,String bucketName,boolean isPrivate){
+	/**
+	 * 上传文件
+	 * @param file 本地文件
+	 * @param bucketName bucket名称
+	 * @param isPrivate 是否是私有（为true，访问权限为私有，为false，访问权限为公共读）
+	 */
+	public static void uploadFile(File file, String bucketName,boolean isPrivate) {
 		uploadFile(file, bucketName, file.getName(), isPrivate);
 	}
-	
-	public static boolean downloadFile(String bucketName,String fileName,String saveFilePath){
+	/**
+	 * 下载文件
+	 * @param bucketName bucket名称
+	 * @param fileName oss文件路径
+	 * @param saveFilePath 本地文件路径
+	 * @return 是否下载成功
+	 */
+	public static boolean downloadFile(String bucketName, String fileName,String saveFilePath) {
 		OSSClient ossClient = null;
 		try {
 			ossClient = getClient();
-			if(ossClient.doesObjectExist(bucketName, fileName)){
+			if (ossClient.doesObjectExist(bucketName, fileName)) {
 				OSSObject object = ossClient.getObject(bucketName, fileName);
-				return FileUtil.saveFile(object.getObjectContent(), saveFilePath);
+				return FileUtil.saveFile(object.getObjectContent(),saveFilePath);
 			}
 			return false;
 		} finally {
@@ -177,8 +206,31 @@ public class OssOperate {
 			}
 		}
 	}
-	
-	public static void deleteFile(String bucketName,String fileName){
+	/**
+	 * 删除目录
+	 * @param bucketName bucket名称
+	 * @param dirName 路径名称
+	 */
+	public static void deleteDir(String bucketName, String dirName) {
+		OSSClient ossClient = null;
+		try {
+			ossClient = getClient();
+			List<OSSObjectSummary> objects = ossClient.listObjects(bucketName,dirName).getObjectSummaries();
+			for (OSSObjectSummary ossObjectSummary : objects) {
+				ossClient.deleteObject(bucketName, ossObjectSummary.getKey());
+			}
+		} finally {
+			if (null != ossClient) {
+				ossClient.shutdown();
+			}
+		}
+	}
+	/**
+	 * 删除文件
+	 * @param bucketName bucket名称
+	 * @param fileName 文件名称
+	 */
+	public static void deleteFile(String bucketName, String fileName) {
 		OSSClient ossClient = null;
 		try {
 			ossClient = getClient();
@@ -187,6 +239,71 @@ public class OssOperate {
 			if (null != ossClient) {
 				ossClient.shutdown();
 			}
+		}
+	}
+	
+	/**
+	 * 分页查询文件
+	 * @param bucketName bucket名称
+	 * @param dir 文件前缀
+	 * @param nextMarker 下一个文件名
+	 * @param maxKeys 最大查询条数
+	 */
+	public static OssPage listPage(String bucketName, String dir,String nextMarker, Integer maxKeys) {
+		OSSClient ossClient = null;
+		try {
+			ossClient = getClient();
+			ListObjectsRequest listObjectsRequest = new ListObjectsRequest(bucketName);
+			listObjectsRequest.setPrefix(dir);
+			listObjectsRequest.setMarker(nextMarker);
+			if (maxKeys != null) {
+				listObjectsRequest.setMaxKeys(maxKeys);
+			}
+			ObjectListing objectListing = ossClient.listObjects(listObjectsRequest);
+			List<OSSObjectSummary> summrayList = objectListing.getObjectSummaries();
+			OssPage page = new OssPage();
+			String newxNextMarker = objectListing.getNextMarker();
+			page.setNextMarker(newxNextMarker);
+			page.setSummrayList(summrayList);
+			return page;
+		}finally {
+			if (null != ossClient) {
+				ossClient.shutdown();
+			}
+		}
+	}
+	/**
+	 * 一次迭代，获得某个目录下的所有文件列表
+	 * @param bucketName bucket名称
+	 * @param dir 文件前缀
+	 * @return OSSObjectSummary列表
+	 */
+	public static List<OSSObjectSummary> getAllFile(String bucketName, String dir) {
+		OSSClient ossClient = null;
+		List<OSSObjectSummary> allSummaries = new ArrayList<OSSObjectSummary>();
+		try {
+			ossClient = getClient();
+			ObjectListing objectListing = null;
+			String nextMarker = null;
+			final int maxKeys = 1000;
+			do {
+				ListObjectsRequest listObjectsRequest = new ListObjectsRequest(bucketName).withPrefix(dir).withMarker(nextMarker).withMaxKeys(maxKeys);
+				objectListing = ossClient.listObjects(listObjectsRequest);
+				List<OSSObjectSummary> summrayList = objectListing.getObjectSummaries();
+				allSummaries.addAll(summrayList);
+				nextMarker = objectListing.getNextMarker();
+			} while (objectListing.isTruncated());
+			return allSummaries;
+		}finally {
+			if (null != ossClient) {
+				ossClient.shutdown();
+			}
+		}
+	}
+	public static void main(String[] args) {
+		Set<String> list = getAllRootFiles("test-codeonetake");
+		for (String string : list) {
+			System.out.println(string);
 		}
 	}
 }

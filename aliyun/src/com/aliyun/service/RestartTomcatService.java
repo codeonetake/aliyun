@@ -9,10 +9,8 @@ public class RestartTomcatService {
 		if(path.startsWith("file:")){
 			path = path.replaceAll("file:", "");
 		}
-		System.out.println("path:"+path);
 		try {
 			String shell = "java -jar " + path;
-			System.out.println(shell);
 			DoShell.shell(shell);
 		} catch (Exception e) {
 			e.printStackTrace();

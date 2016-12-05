@@ -50,11 +50,19 @@
   <body>
   	<jsp:include page="temp/nav.jsp"></jsp:include>
   	<div class="container" style="width:88%;margin-top:30px">
-  		<button id="getUpdateInfoBtn" class="btn btn-default">备份信息</button>
-  		<button id="getRestartInfoBtn" class="btn btn-default">重启信息</button>
-  		<button id="getFileTableBtn" class="btn btn-default">备份列表</button>
-  		<button id="updateBakBtn" class="btn btn-primary">开始备份</button>
-  		<button id="restartTomcatBtn" class="btn btn-danger">开始重启</button>
+  		<div class="btn-group">
+	  		<button id="getUpdateInfoBtn" class="btn btn-default">备份信息</button>
+	  		<button id="getRestartInfoBtn" class="btn btn-default">重启信息</button>
+	  	</div>
+	  		<button id="getFileTableBtn" class="btn btn-default">备份列表</button>
+	  	<div class="btn-group">
+	  		<button id="updateBakBtn" class="btn btn-primary">开始备份</button>
+	  		<button id="restartTomcatBtn" class="btn btn-danger">开始重启</button>
+	  	</div>
+  		<div class="btn-group">
+		  <button type="button" class="btn" id="autoBakBtn"></button>
+		  <button type="button" class="btn" id="autoRestartBtn"></button>
+		</div>
   		<hr/>
   		<div id="getFileTableDiv"></div>
   		<div id="getUpdateInfoDiv"></div>
@@ -143,5 +151,39 @@
   	  		});
   		}
   	});
+  	$("#autoBakBtn").click(function(){
+  		changeRule(0);
+  	});
+  	$("#autoRestartBtn").click(function(){
+  		changeRule(1);
+  	});
+  	function changeRule(type){
+  		$.ajax({
+  			type:"POST",
+  			url:"/changeRule",
+  			data:"type="+type,
+  			success:function(data){
+  				initRule(data);
+  			}
+  		});
+  	}
+  	initRule("${rule}");
+  	function initRule(rule){
+  		var rs = rule.split("|");
+  		if(rs[0] == "1"){
+  			$("#autoBakBtn").html("关闭自动备份");
+  			$("#autoBakBtn").removeClass("btn-info").addClass("btn-danger");
+  		}else{
+  			$("#autoBakBtn").html("开启自动备份");
+  			$("#autoBakBtn").removeClass("btn-danger").addClass("btn-info");
+  		}
+  		if(rs[1] == "1"){
+  			$("#autoRestartBtn").html("关闭自动重启");
+  			$("#autoRestartBtn").removeClass("btn-info").addClass("btn-danger");
+  		}else{
+  			$("#autoRestartBtn").html("开启自动重启");
+  			$("#autoRestartBtn").removeClass("btn-danger").addClass("btn-info");
+  		}
+  	}
   </script>
 </html>

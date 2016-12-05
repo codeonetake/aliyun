@@ -2,7 +2,10 @@ package com.aliyun.service;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 import com.aliyun.util.DoShell;
 import com.aliyun.util.ObjSave;
@@ -41,6 +44,9 @@ public class UploadBakService {
 		m("");
 		m("==========================");
 		bakMysql(bucketName,bakFileHead);
+		m("==========================");
+		delOverTimeFile(bucketName);
+		m("==========================");
 		m("总备份结束，总成功条数为：("+totalSuccessCount+")，总失败条数：("+totalFailCount+")");
 		//保存结果
 		File bakSer = new File(bakSerFile);
@@ -76,6 +82,48 @@ public class UploadBakService {
 			msg += content + "，时间："+time+"<br/>";
 		}else{
 			msg += content + "<br/>";
+		}
+	}
+	private static void delOverTimeFile(String bucketName){
+		m("查询并删除过期文件开始");
+		try {
+			String wpBakMaxCount = OssConfig.getValue("wpBakMaxCount");
+			wpBakMaxCount="20";
+			if(null == wpBakMaxCount || "".equals(wpBakMaxCount)){
+				m("未设置最大备份文件保留数，不删除文件");
+			}else{
+				int maxCount = 0;
+				try {
+					maxCount = Integer.parseInt(wpBakMaxCount);
+				} catch (Exception e) {
+					m("最大备份文件保留数不是整数，设置失败");
+				}
+				if(0 != maxCount){
+					m("最大备份文件保留数为("+maxCount+")");
+				}
+				Set<String> rootFiles = OssOperate.getAllRootFiles(bucketName);
+				int currentSize = rootFiles.size();
+				m("当前已经备份("+currentSize+")个文件");
+				if(currentSize > maxCount){
+					int needDelCount = currentSize - maxCount;
+					m("需要删除("+needDelCount+")个文件");
+					List<String> rootFileList = new ArrayList<String>();
+					rootFileList.addAll(rootFiles);
+					List<String> needToDelFiles = rootFileList.subList(0, needDelCount);
+					m("删除过期备份文件开始");
+					for (String needToDelFile : needToDelFiles) {
+						m("删除文件: ("+needToDelFile+")");
+						OssOperate.deleteDir(bucketName, needToDelFile);
+					}
+					m("删除过期备份文件结束");
+				}else{
+					m("没有过期文件，不进行删除");
+				}
+			}
+			m("查询并删除过期文件成功结束");
+		} catch (Exception e) {
+			e.printStackTrace();
+			m("查询并删除过期文件失败结束");
 		}
 	}
 	
@@ -390,8 +438,5 @@ public class UploadBakService {
 		}else{
 			m("数据库配置为空，不备份");
 		}
-	}
-	public static void main(String[] args) {
-		uploadBak();
 	}
 }

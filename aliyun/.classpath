@@ -24,5 +24,6 @@
 	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/tas-common-0.1.0.jar"/>
 	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/tas-dto-0.1.0.jar"/>
 	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/xcersesample.jar"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/aliyun-restart-tomcat.jar"/>
 	<classpathentry kind="output" path="WebRoot/WEB-INF/classes"/>
 </classpath>

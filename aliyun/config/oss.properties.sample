@@ -1,0 +1,31 @@
+endpoint=阿里云oss的endpoint
+accessKeyId=阿里云oss的accessKeyId
+accessKeySecret=阿里云oss的accessKeySecret
+
+#备份记录文件存放的地址
+bakSerFile = /root/data/aliyun/bak.ser
+bakBucketName=用于备份的阿里云oss的Bucket名称
+#tomcat集群目录
+tomcatsBakPath=/root/application/tomcats/
+#tomcat管理项目的目录（没有可以为空）
+manageTomcatPath=/root/application/apache-tomcat-manager/
+#不需要备份的tomcat的名称
+removeBakTomcat=|apache-tomcat-quiver|
+#最大保留天数（未实现，保留）
+wpBakMaxCount=30
+#收件人邮箱（未实现，保留）
+emailPath=codeonetake@163.com
+#下载缓存路径（未实现，保留）
+downLoadTempPath=/Users/liuwenbin/Desktop/temp/
+#nginx日志存放路径
+nginxLog = /Users/liuwenbin/Desktop/nginx/
+#nginx配置存放路径
+nginxConf = /Users/liuwenbin/Desktop/conf/
+#nginx需要配置的项目（格式  项目名称:项目路径）
+nginxProjs = jpress:/Users/liuwenbin/Desktop/jpress/;one:/Users/liuwenbin/Desktop/one/
+#需要备份的mysql的数据表，使用 ; 分割
+bakMysqlDB = wordpress;liuwenbin_index
+#mysql的用户名
+dbname=
+#mysql的密码
+dbpwd=

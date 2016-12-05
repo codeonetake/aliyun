@@ -21,8 +21,8 @@ import com.aliyun.oss.model.PutObjectRequest;
 
 public class OssOperate {
 	private static String endpoint = OssConfig.getValue("endpoint");
-	private static String accessKeyId = "LTAIOWHFyQYc3gQN";
-	private static String accessKeySecret = "kkN3gdS3x32g4etD7lpYbNnpYZmlmr";
+	private static String accessKeyId = OssConfig.getValue("accessKeyId");
+	private static String accessKeySecret = OssConfig.getValue("accessKeySecret");
 	private static ClientConfiguration configuration = null;
 	
 	private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

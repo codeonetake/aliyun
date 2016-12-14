@@ -3,6 +3,7 @@ package com.aliyun.util;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -14,12 +15,15 @@ import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.model.Bucket;
 import com.aliyun.oss.model.CannedAccessControlList;
 import com.aliyun.oss.model.CreateBucketRequest;
+import com.aliyun.oss.model.HeadObjectRequest;
 import com.aliyun.oss.model.ListObjectsRequest;
 import com.aliyun.oss.model.LocationConstraint;
 import com.aliyun.oss.model.OSSObject;
 import com.aliyun.oss.model.OSSObjectSummary;
 import com.aliyun.oss.model.ObjectListing;
 import com.aliyun.oss.model.PutObjectRequest;
+import com.google.gson.Gson;
+import com.sun.org.apache.commons.beanutils.BeanComparator;
 
 /**
  * 阿里云oss基础操作类
@@ -77,6 +81,20 @@ public class OssOperate {
 			}
 		}
 	}
+	public static boolean fileExist(String bucketName, String path) {
+		OSSClient ossClient = null;
+		try {
+			ossClient = getClient();
+			return ossClient.doesObjectExist(bucketName, path);
+		} finally {
+			if (null != ossClient) {
+				ossClient.shutdown();
+			}
+		}
+	}
+	public static void main(String[] args) {
+		System.out.println(fileExist("test-codeonetake", "1/1"));
+	}
 	/**
 	 * 获取所有的bucket
 	 * @return bucket对象列表
@@ -112,7 +130,9 @@ public class OssOperate {
 				List<OSSObjectSummary> summrayList = objectListing.getObjectSummaries();
 				for (OSSObjectSummary ossObjectSummary : summrayList) {
 					dirName = ossObjectSummary.getKey();
-					dirName = dirName.substring(0,dirName.indexOf("/"));
+					if(dirName.contains("/")){
+						dirName = dirName.substring(0,dirName.indexOf("/"));
+					}
 					rootDirs.add(dirName);
 				}
 				nextMarker = objectListing.getNextMarker();
@@ -124,32 +144,65 @@ public class OssOperate {
 			}
 		}
 	}
-	/**
-	 * 获取某前缀下所有文件详情
-	 * @param bucketName bucket名称
-	 * @param prefix 文件名前缀
-	 * @return
-	 */
-	public static List<OssFile> getAllFileDetail(String bucketName,String prefix) {
+	
+	public static List<OssFile> getAllRootOssFile(String bucketName,String prefix) {
+		if(!prefix.endsWith("/") && !prefix.equals("")){
+			prefix += "/";
+		}
 		OSSClient ossClient = null;
-		List<OssFile> ossFiles = new ArrayList<OssFile>();
+		List<OssFile> rootDirs = new ArrayList<OssFile>();
 		try {
 			ossClient = getClient();
-			List<OSSObjectSummary> objects = ossClient.listObjects(bucketName,prefix).getObjectSummaries();
+			ObjectListing objectListing = null;
+			String nextMarker = null;
+			final int maxKeys = 1000;
+			String dirName = null;
 			OssFile ossFile = null;
-			for (OSSObjectSummary ossObjectSummary : objects) {
-				ossFile = new OssFile();
-				ossFile.setFileName(ossObjectSummary.getKey());
-				ossFile.setModifyTime(format.format(ossObjectSummary.getLastModified()));
-				ossFile.setSize(FileUtil.getSize(ossObjectSummary.getSize()));
-				ossFiles.add(ossFile);
-			}
-		} finally {
+			do {
+				ListObjectsRequest listObjectsRequest = new ListObjectsRequest(bucketName).withPrefix(prefix).withMarker(nextMarker).withMaxKeys(maxKeys);
+				objectListing = ossClient.listObjects(listObjectsRequest);
+				List<OSSObjectSummary> summrayList = objectListing.getObjectSummaries();
+				for (OSSObjectSummary ossObjectSummary : summrayList) {
+					ossFile = new OssFile();
+					dirName = ossObjectSummary.getKey();
+					if(dirName.endsWith("/")){
+						//文件夹
+						ossFile.setType(1);
+					}else{
+						//文件
+						ossFile.setType(0);
+					}
+					if(!"".equals(prefix)){
+						//替换前缀
+						dirName = dirName.replaceAll(prefix, "");
+					}
+					if(dirName.contains("/")){
+						//获取文件名
+						dirName = dirName.substring(0,dirName.indexOf("/"));
+						ossFile.setType(1);
+					}
+					if("".equals(dirName)){
+						continue;
+					}
+					if(0 == ossFile.getType()){
+						ossFile.setModifyTime(format.format(ossObjectSummary.getLastModified()));
+						ossFile.setSize(FileUtil.getSize(ossObjectSummary.getSize()));
+					}
+					ossFile.setFileName(dirName);
+					ossFile.setCurrentName(prefix + dirName);
+					if(!rootDirs.contains(ossFile)){
+						rootDirs.add(ossFile);
+					}
+				}
+				nextMarker = objectListing.getNextMarker();
+			} while (objectListing.isTruncated());
+			Collections.sort(rootDirs);
+			return rootDirs;
+		}finally {
 			if (null != ossClient) {
 				ossClient.shutdown();
 			}
 		}
-		return ossFiles;
 	}
 	/**
 	 * 上传文件
@@ -279,6 +332,9 @@ public class OssOperate {
 	 * @return OSSObjectSummary列表
 	 */
 	public static List<OSSObjectSummary> getAllFile(String bucketName, String dir) {
+		if(!dir.endsWith("/")){
+			dir += "/";
+		}
 		OSSClient ossClient = null;
 		List<OSSObjectSummary> allSummaries = new ArrayList<OSSObjectSummary>();
 		try {
@@ -298,12 +354,6 @@ public class OssOperate {
 			if (null != ossClient) {
 				ossClient.shutdown();
 			}
-		}
-	}
-	public static void main(String[] args) {
-		Set<String> list = getAllRootFiles("test-codeonetake");
-		for (String string : list) {
-			System.out.println(string);
 		}
 	}
 }

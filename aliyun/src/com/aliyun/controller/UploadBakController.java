@@ -129,8 +129,9 @@ public class UploadBakController {
 	public void download(HttpServletRequest request,HttpServletResponse response) throws Exception{
 		String bucket = request.getParameter("bucket");
 		String filePath = request.getParameter("fileName");
+		int type = Integer.parseInt(request.getParameter("type"));
 		//先下载到本地
-		filePath = OSSUtil.moveTolocal(bucket, filePath);
+		filePath = OSSUtil.moveTolocal(bucket, filePath, type);
 		File file = new File(filePath);
 		if (file == null || !file.exists()) {
 			return;

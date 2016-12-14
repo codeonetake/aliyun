@@ -31,7 +31,7 @@
 	<link rel="stylesheet" href="/css/animate.css">
 	<script src="/js/jquery.min.js"></script>
 	<script src="/js/bootstrap.min.js"></script>
-	<script src="/js/echarts.min.js"></script>
+	<script src="/js/fileUpload.js"></script>
 	<style type="text/css">
 		.box {
 			border: 1px solid #d9d9d9;
@@ -44,6 +44,14 @@
 			animation-duration: 1.2s;
   			-moz-animation-duration: 1.2s;
   			-webkit-animation-duration: 1.2s;
+		}
+		#bk{
+		     filter:alpha(opacity=75);
+		    /*IE滤镜，透明度50%*/
+		     -moz-opacity:0.75;
+		    /*Firefox私有，透明度50%*/
+		     opacity:0.75;
+		    /*其他，透明度50%*/
 		}
 	</style>
   </head>
@@ -60,17 +68,26 @@
   		<div id="bucketInfoDiv" class="box" style="margin: 5px 0px 5px 0px;display:none">
   		</div>
   		<div id="bucketFileDiv" class="box" style="margin: 5px 0px 5px 0px;display:none">
-  			输入文件路径下载：<input id="filePathInput" type="text" class="form-control" style="width:400px;display:inline"/>
-  			<button id="downloadBtn" class="btn btn-default" style="display:inline">下载</button>
+  			文件路径：
+  			<button id="backBtn" class="btn btn-default">&lt;</button>
+  			<input id="filePathInput" type="text" class="form-control" style="width:400px;display:inline;margin-top:3px"/>
+  			<button id="jumpBtn" class="btn btn-default" style="display:inline">跳转</button>
+  			<button id="downloadBarBtn" class="btn btn-default" style="display:inline">下载</button>
+  			<button id="uploadFileBtn" class="btn btn-default" style="display:inline">上传</button>
+  			<input id="ossUpFile" name="ossUpFile" type="file" style="display:none">
   			<hr/>
   			<table id="bucketFileTable" class="table table-bordered" style="width:100%">
   			</table>
   		</div>
   	</div>
+  	<div id="bk" style="width:100%;height:100%;position:absolute;top:0px;left:0px;overflow:hidden;z-index:999;background-color:black;display:none"></div>
   </body>
   <script type="text/javascript">
+  	var prefix = "";
+  	var current = "";
   	var currentBucket="";
   	$("#bucketBtnDiv button").click(function(){
+  		prefix = "";
   		$("#bucketFileTable").html("");
   		 $("#bucketInfoDiv").show();
   		 currentBucket=$(this).html();
@@ -89,27 +106,133 @@
   	
   	$("#bucketBtnDiv button").dblclick(function(){
   		var btn = $(this);
+  		getFileList(btn.html(),prefix,true);
+ 	});
+  	function downloadFile(type,currentName){
+  		location.href="/oss/download?bucket="+currentBucket+"&filePath="+currentName+"&type="+type;
+  	}
+  	function deleteFile(type,currentName){
   		$.ajax({
-  			url:"/oss/rootFile",
-  			data:"bucket="+btn.html(),
   			type:"POST",
+  			data:"bucket="+currentBucket+"&filePath="+currentName+"&type="+type,
+  			url:"/oss/deleteFile",
+  			beforeSend:function(){
+  				$("#bk").show();	
+  			},
   			success:function(data){
-  				var html = "";
-  				$.each(data,function(i,n){
-  					html+="<tr><td>"+n+"</td></tr>";
-  				});
-  				$("#bucketFileTable").html(html);
-  				$("#filePath").html("/");
-  				$("#bucketFileTable tr").dblclick(getBucketFile);
+  				$("#bk").hide();	
+  				if("success" == data){
+  					getFileList(currentBucket,prefix,false);
+  				}
   			}
   		});
- 	});
-  	function getBucketFile(){
-  		$("#filePathInput").val($(this).text());
   	}
-  	$("#downloadBtn").click(function(){
-  		var filePath = $("#filePathInput").val();
-  		location.href="/oss/download?bucket="+currentBucket+"&filePath="+filePath;
+  	function checkPath(path){
+  		$.ajax({
+  			url:"/oss/checkPath",
+  			type:"POST",
+  			async:false,
+  			data:"path="+path+"&bucket="+currentBucket,
+  			beforeSend:function(){
+  				$("#bk").show();	
+  			},
+  			success:function(data){
+  				$("#bk").hide();
+  				if("|not file|"==data){
+  					alert($("#filePathInput").val()+"文件不存在");
+  				}else{
+  					$("#filePathInput").val(data);
+  				}
+  			}
+  		});
+  	}
+  	$("#jumpBtn").click(function(){
+  		var val = $("#filePathInput").val();
+  		checkPath(val);
+  		//开始跳转
+  		prefix = $("#filePathInput").val();
+  		getFileList(currentBucket,prefix,true);
   	});
+  	$("#backBtn").click(function(){
+  		var val = $("#filePathInput").val();
+  		checkPath(val);
+  		prefix = $("#filePathInput").val();
+  		if(prefix.indexOf("/") == -1){
+  			prefix = "";
+  		}else{
+  			prefix = prefix.substr(0,prefix.lastIndexOf("/"));
+  		}
+  		getFileList(currentBucket,prefix,true);
+  	});
+  	$("#downloadBarBtn").click(function(){
+  		var val = $("#filePathInput").val();
+  		checkPath(val);
+  		//开始下载
+  		prefix = $("#filePathInput").val();
+  		getFileList(currentBucket,prefix,false);
+  		downloadFile(1,prefix);
+  	});
+  	function getFileList(bucket,prefix,asyncType){
+  		$("#filePathInput").val(prefix);
+  		$.ajax({
+  			url:"/oss/rootFile",
+  			data:"bucket="+bucket+"&prefix="+prefix,
+  			async:asyncType,
+  			type:"POST",
+  			beforeSend:function(){
+  				$("#bk").show();	
+  			},
+  			success:function(data){
+  				$("#bk").hide();
+  				var html = "";
+  				$.each(data,function(i,n){
+  					if(n.type == 1){
+	  					html+="<tr type='1'><td class='fileName' colspan='3'>"+n.fileName+"</td><td><a href='javascript:;' onclick=\"downloadFile('"+n.type+"','"+n.currentName+"')\">下载</a> | <a href='javascript:;' onclick=\"deleteFile('"+n.type+"','"+n.currentName+"')\">删除</a></td></tr>";
+  					}else{
+  						html+="<tr type='0'><td style='color:#ababab'>"+n.fileName+"</td><td><code>"+n.size+"</code></td><td><code>"+n.modifyTime+"</code></td><td><a href='javascript:;' onclick=\"downloadFile('"+n.type+"','"+n.currentName+"')\">下载</a> | <a href='javascript:;' onclick=\"deleteFile('"+n.type+"','"+n.currentName+"')\">删除</a></td></tr>";
+  					}
+  				});
+  				$("#bucketFileTable").html(html);
+  				//文件夹点击
+  				$("#bucketFileTable tr[type='1']").dblclick(function(){
+  					if(prefix == ""){
+  						prefix = $(this).find(".fileName").text();
+  					}else{
+  						prefix = prefix + "/" +$(this).find(".fileName").text();
+  					}
+  					getFileList(bucket,prefix,true);
+  				});
+  				//文件点击
+  			}
+  		});
+  	}
+  	$("#uploadFileBtn").click(function(){
+  		$("#ossUpFile").click();
+  	});
+  	$("#ossUpFile").change(uploadFileFunc);
+  	function uploadFileFunc(){
+  		prefix = $("#filePathInput").val();
+  		$.ajaxFileUpload({
+  		     url:'/oss/uploadFileAjax',
+  		     fileElementId:'ossUpFile',
+  		   	 dataType : 'text',
+  		   	 data:{"bucket":currentBucket,"prefix":prefix},
+  		  	 beforeSend:function(){
+ 				$("#bk").show();	
+ 			},
+  		     success: function (data, status){
+  		    		$("#bk").hide();
+  		    		getFileList(currentBucket,prefix,false);
+  		    		$("#ossUpFile").val("");
+  		    		$("#ossUpFile").change(uploadFileFunc);
+  		     },
+  		     error: function (data, status){
+  		    		$("#bk").hide();
+  		    		$("#ossUpFile").val("");
+  		    		$("#ossUpFile").change(uploadFileFunc);
+  		    		//错误处理
+  		     }
+  		 });
+  	}
   </script>
 </html>

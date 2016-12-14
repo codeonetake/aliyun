@@ -5,7 +5,7 @@
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
         <li><a href="/oss">oss集群</a></li>
-        <li><a href="/bakpage">服务器备份</a></li>
+        <li><a href="/bak">服务器备份</a></li>
       </ul>
     </div>
   </div>

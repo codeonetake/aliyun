@@ -24,10 +24,10 @@ import com.aliyun.util.OssConfig;
 import com.aliyun.util.OssOperate;
 
 @Controller
-@RequestMapping(value="")
+@RequestMapping(value="/bak")
 public class UploadBakController {
 
-	@RequestMapping(value="uploadBak")
+	@RequestMapping(value="/uploadBak")
 	public void uploadWpBak(HttpServletRequest request,HttpServletResponse response) throws Exception{
 		response.setCharacterEncoding("UTF-8");
 		request.setCharacterEncoding("UTF-8");
@@ -43,7 +43,7 @@ public class UploadBakController {
 		out.close();
 	}
 	
-	@RequestMapping(value="restartTomcat")
+	@RequestMapping(value="/restartTomcat")
 	public void restartTomcat(HttpServletRequest request,HttpServletResponse response) throws Exception{
 		response.setCharacterEncoding("UTF-8");
 		request.setCharacterEncoding("UTF-8");
@@ -58,7 +58,7 @@ public class UploadBakController {
 		}).start();
 	}
 	
-	@RequestMapping(value="getRestartInfo")
+	@RequestMapping(value="/getRestartInfo")
 	public void getRestartInfo(HttpServletRequest request,HttpServletResponse response) throws Exception{
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
@@ -68,7 +68,7 @@ public class UploadBakController {
 		out.close();
 	}
 	
-	@RequestMapping(value="bakpage")
+	@RequestMapping(value="")
 	public ModelAndView bakpage(HttpServletRequest request,HttpServletResponse response) throws Exception{
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
@@ -81,7 +81,7 @@ public class UploadBakController {
 		return modelAndView;
 	}
 	
-	@RequestMapping(value="getFileTable")
+	@RequestMapping(value="/getFileTable")
 	public @ResponseBody Set<String> getFileTable(HttpServletRequest request,HttpServletResponse response) throws Exception{
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
@@ -89,7 +89,7 @@ public class UploadBakController {
 		return OssOperate.getAllRootFiles(bucketName);
 	}
 	
-	@RequestMapping(value="getUpdateInfo")
+	@RequestMapping(value="/getUpdateInfo")
 	public void getUpdateInfo(HttpServletRequest request,HttpServletResponse response) throws Exception{
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
@@ -100,7 +100,7 @@ public class UploadBakController {
 		out.close();
 	}
 	
-	@RequestMapping(value="changeRule")
+	@RequestMapping(value="/changeRule")
 	public void changeRule(HttpServletRequest request,HttpServletResponse response) throws Exception{
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("UTF-8");
@@ -125,7 +125,7 @@ public class UploadBakController {
 		out.close();
 	}
 	
-	@RequestMapping(value="download")
+	@RequestMapping(value="/download")
 	public void download(HttpServletRequest request,HttpServletResponse response) throws Exception{
 		String bucket = request.getParameter("bucket");
 		String filePath = request.getParameter("fileName");

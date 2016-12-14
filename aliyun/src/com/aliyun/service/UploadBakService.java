@@ -88,7 +88,6 @@ public class UploadBakService {
 		m("查询并删除过期文件开始");
 		try {
 			String wpBakMaxCount = OssConfig.getValue("wpBakMaxCount");
-			wpBakMaxCount="20";
 			if(null == wpBakMaxCount || "".equals(wpBakMaxCount)){
 				m("未设置最大备份文件保留数，不删除文件");
 			}else{
@@ -332,7 +331,7 @@ public class UploadBakService {
 				System.out.println(tarFilePath);
 				String bakFilePath = bakFileHead + "/nginx/conf/" + tarFileName;
 				shell = "tar -zcPf " + tarFilePath + " " + nginxConf;
-				m("["+shell+"]");
+				m("["+shell+"]"); 
 				DoShell.shell(shell);
 				m("上传Nginx配置开始");
 				OssOperate.uploadFile(new File(tarFilePath), bucketName, bakFilePath, true);

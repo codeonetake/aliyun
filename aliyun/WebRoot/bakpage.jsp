@@ -71,7 +71,7 @@
   <script type="text/javascript">
   	$("#getFileTableBtn").click(function(){
   		$.ajax({
-  			url:"/getFileTable",
+  			url:"/bak/getFileTable",
   			type:"POST",
   			success:function(data){
   				var content = "<table class=\"table table-bordered\" style=\"width:100%\">";
@@ -85,7 +85,7 @@
   	});
   	$("#getUpdateInfoBtn").click(function(){
   		$.ajax({
-  			url:"/getUpdateInfo",
+  			url:"/bak/getUpdateInfo",
   			type:"POST",
   			success:function(data){
   				$("#getUpdateInfoDiv").html(data);
@@ -94,7 +94,7 @@
   	});
   	$("#getRestartInfoBtn").click(function(){
   		$.ajax({
-  			url:"/getRestartInfo",
+  			url:"/bak/getRestartInfo",
   			type:"POST",
   			success:function(data){
   				$("#getUpdateInfoDiv").html(data);
@@ -105,7 +105,7 @@
   		var btn = $(this); 
   		if(btn.attr("class").indexOf("btn-primary")!=-1){
   			$.ajax({
-  	  			url:"/uploadBak",
+  	  			url:"/bak/uploadBak",
   	  			type:"POST",
   	  			beforeSend:function(){
   	  				btn.removeClass("btn-primary").addClass("btn-warning");
@@ -121,7 +121,7 @@
   	});
   	function getRestartInfo(){
   		$.ajax({
-  			url:"/getRestartInfo",
+  			url:"/bak/getRestartInfo",
   			type:"POST",
   			error:function(){
   				setTimeout("getRestartInfo()",1000);
@@ -140,7 +140,7 @@
   		var btn = $(this); 
   		if(btn.html()=="开始重启"){
   			$.ajax({
-  	  			url:"/restartTomcat",
+  	  			url:"/bak/restartTomcat",
   	  			type:"POST",
   	  			beforeSend:function(){
   	  				$("#restartTomcatBtn").html("重 启 中");
@@ -160,7 +160,7 @@
   	function changeRule(type){
   		$.ajax({
   			type:"POST",
-  			url:"/changeRule",
+  			url:"/bak/changeRule",
   			data:"type="+type,
   			success:function(data){
   				initRule(data);

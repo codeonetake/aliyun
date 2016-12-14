@@ -61,7 +61,16 @@
             </list>  
         </property>  
     </bean>
-    
+    <mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/oss"/>
+			<mvc:mapping path="/oss/*"/>
+			<mvc:mapping path="/bak/*"/>
+			<mvc:mapping path="/bak"/>
+			<!-- 定义在mvc:interceptor下面的表示是对特定的请求才进行拦截的 -->
+			<bean class="com.aliyun.interceptor.LoginInterceptor"/>
+		</mvc:interceptor>
+	</mvc:interceptors>
     <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 	    <property name="prefix" value="/" />  
 	    <property name="suffix" value=".jsp" />  

@@ -16,7 +16,6 @@ import com.aliyun.oss.model.Bucket;
 import com.aliyun.oss.model.CannedAccessControlList;
 import com.aliyun.oss.model.CreateBucketRequest;
 import com.aliyun.oss.model.ListObjectsRequest;
-import com.aliyun.oss.model.LocationConstraint;
 import com.aliyun.oss.model.OSSObject;
 import com.aliyun.oss.model.OSSObjectSummary;
 import com.aliyun.oss.model.ObjectListing;
@@ -27,7 +26,7 @@ import com.aliyun.oss.model.PutObjectRequest;
  * @author liuwenbin
  *
  */
-public class OssOperate {
+public class OssOperateSample {
 	//阿里云的endpoint，请去oss的控制台查看
 	private static String endpoint = OssConfig.getValue("endpoint");
 	//阿里云的accessKeyId和accessKeySecret
@@ -49,28 +48,23 @@ public class OssOperate {
 	 * @return oss客户端
 	 */
 	public static OSSClient getClient() {
-		OSSClient ossClient = new OSSClient(endpoint, accessKeyId,accessKeySecret, configuration);
+		OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret, configuration);
 		return ossClient;
 	}
+	
 	/**
 	 * 创建bucket
 	 * @param bucketName bucket的名称
-	 * @param isPrivate 是否是私有（如果为tue，权限为私有，如果为false，权限是公共读）
+	 * @param acl 读写权限。0：私有，1：公共读，2：公共读写
+	 * @param location oss所属区域。使用com.aliyun.oss.model.LocationConstraint类获取所属区域。
 	 */
-	public static void createBucket(String bucketName, boolean isPrivate) {
+	public static void createBucket(String bucketName, int acl,String location) {
 		OSSClient ossClient = null;
 		try {
 			ossClient = getClient();
 			CreateBucketRequest createBucketRequest = new CreateBucketRequest(bucketName);
-			if (isPrivate) {
-				createBucketRequest
-						.setCannedACL(CannedAccessControlList.Private);
-			} else {
-				createBucketRequest
-						.setCannedACL(CannedAccessControlList.PublicRead);
-			}
-			createBucketRequest
-					.setLocationConstraint(LocationConstraint.OSS_CN_HONGKONG);
+			createBucketRequest.setCannedACL(getACL(acl));
+			createBucketRequest.setLocationConstraint(location);
 			ossClient.createBucket(createBucketRequest);
 		} finally {
 			if (null != ossClient) {
@@ -78,6 +72,13 @@ public class OssOperate {
 			}
 		}
 	}
+	
+	/**
+	 * 判断文件是否存在
+	 * @param bucketName bucket名称
+	 * @param path 文件路径
+	 * @return 是否存在
+	 */
 	public static boolean fileExist(String bucketName, String path) {
 		OSSClient ossClient = null;
 		try {
@@ -89,9 +90,7 @@ public class OssOperate {
 			}
 		}
 	}
-	public static void main(String[] args) {
-		System.out.println(fileExist("test-codeonetake", "1/1"));
-	}
+	
 	/**
 	 * 获取所有的bucket
 	 * @return bucket对象列表
@@ -107,8 +106,9 @@ public class OssOperate {
 			}
 		}
 	}
+	
 	/**
-	 * 获取所有的根目录
+	 * 获取根目录名称。注意：当bucket中文件过多时，该方法有性能问题，请谨慎使用。
 	 * @param bucketName bucket名称
 	 * @return 根目录文件名列表
 	 */
@@ -142,7 +142,13 @@ public class OssOperate {
 		}
 	}
 	
-	public static List<OssFile> getAllRootOssFile(String bucketName,String prefix) {
+	/**
+	 * 获取某个前缀下的OssFile对象列表
+	 * @param bucketName bucket名称
+	 * @param prefix 文件路径前缀，如果是根文件，请填写空字符串("")
+	 * @return OssFile的列表
+	 */
+	public static List<OssFile> getOssFiles(String bucketName,String prefix) {
 		if(!prefix.endsWith("/") && !prefix.equals("")){
 			prefix += "/";
 		}
@@ -201,23 +207,20 @@ public class OssOperate {
 			}
 		}
 	}
+	
 	/**
 	 * 上传文件
 	 * @param file 本地文件
 	 * @param bucketName bucket名称
 	 * @param fileName oss文件路径，如test/test.txt
-	 * @param isPrivate 是否是私有（为true，访问权限为私有，为false，访问权限为公共读）
+	 * @param acl 读写权限。0：私有，1：公共读，2：公共读写
 	 */
-	public static void uploadFile(File file, String bucketName,String fileName, boolean isPrivate) {
+	public static void uploadFile(File file, String bucketName,String fileName, int acl) {
 		OSSClient ossClient = null;
 		try {
 			ossClient = getClient();
 			ossClient.putObject(new PutObjectRequest(bucketName, fileName, file));
-			if (isPrivate) {
-				ossClient.setObjectAcl(bucketName, fileName,CannedAccessControlList.Private);
-			} else {
-				ossClient.setObjectAcl(bucketName, fileName,CannedAccessControlList.PublicRead);
-			}
+			ossClient.setObjectAcl(bucketName, fileName,getACL(acl));
 		} finally {
 			if (null != ossClient) {
 				ossClient.shutdown();
@@ -229,11 +232,12 @@ public class OssOperate {
 	 * 上传文件
 	 * @param file 本地文件
 	 * @param bucketName bucket名称
-	 * @param isPrivate 是否是私有（为true，访问权限为私有，为false，访问权限为公共读）
+	 * @param acl 读写权限。0：私有，1：公共读，2：公共读写
 	 */
-	public static void uploadFile(File file, String bucketName,boolean isPrivate) {
-		uploadFile(file, bucketName, file.getName(), isPrivate);
+	public static void uploadFile(File file, String bucketName,int acl) {
+		uploadFile(file, bucketName, file.getName(), acl);
 	}
+	
 	/**
 	 * 下载文件
 	 * @param bucketName bucket名称
@@ -256,6 +260,7 @@ public class OssOperate {
 			}
 		}
 	}
+	
 	/**
 	 * 删除目录
 	 * @param bucketName bucket名称
@@ -275,6 +280,7 @@ public class OssOperate {
 			}
 		}
 	}
+	
 	/**
 	 * 删除文件
 	 * @param bucketName bucket名称
@@ -322,6 +328,7 @@ public class OssOperate {
 			}
 		}
 	}
+	
 	/**
 	 * 一次迭代，获得某个目录下的所有文件列表
 	 * @param bucketName bucket名称
@@ -351,6 +358,22 @@ public class OssOperate {
 			if (null != ossClient) {
 				ossClient.shutdown();
 			}
+		}
+	}
+	
+	/**
+	 * 根据传入的数字转化成对应的操作权限
+	 * @param acl acl数字
+	 * @return 操作权限
+	 */
+	private static CannedAccessControlList getACL(int acl){
+		switch (acl) {
+			case 0:
+				return CannedAccessControlList.Private;
+			case 1:
+				return CannedAccessControlList.PublicRead;
+			default :
+				return CannedAccessControlList.PublicReadWrite;
 		}
 	}
 }

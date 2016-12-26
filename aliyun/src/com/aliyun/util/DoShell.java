@@ -16,7 +16,6 @@ public class DoShell {
 		String line;
 		while ((line = reader.readLine()) != null) {
 			line = line.trim();
-			System.out.println(line);
 			list.add(line);
 		}
 		process.waitFor();

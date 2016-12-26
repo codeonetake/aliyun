@@ -67,6 +67,8 @@
 			<mvc:mapping path="/oss/*"/>
 			<mvc:mapping path="/bak/*"/>
 			<mvc:mapping path="/bak"/>
+			<mvc:mapping path="/cdn"/>
+			<mvc:mapping path="/cdn/*"/>
 			<!-- 定义在mvc:interceptor下面的表示是对特定的请求才进行拦截的 -->
 			<bean class="com.aliyun.interceptor.LoginInterceptor"/>
 		</mvc:interceptor>

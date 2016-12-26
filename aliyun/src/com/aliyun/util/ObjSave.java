@@ -36,4 +36,8 @@ public class ObjSave {
 		}
 		return null;
 	}
+	
+	public static void main(String[] args) {
+		System.out.println(fileToObject("/Users/liuwenbin/Desktop/restart.ser"));
+	}
 }

@@ -7,6 +7,7 @@ import javax.annotation.PostConstruct;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.aliyun.service.CDNCacheService;
 import com.aliyun.service.RestartTomcatService;
 import com.aliyun.service.UploadBakService;
 import com.aliyun.util.ObjSave;
@@ -30,6 +31,11 @@ public class ServerTask {
      		RestartTomcatService.start();
             System.out.println("定时重启结束");
         }
+    }
+	
+	@Scheduled(cron = "0 0/30 * * * ?")   
+    public void refreshCdn(){
+		CDNCacheService.refresh();
     }
 	
 	@PostConstruct

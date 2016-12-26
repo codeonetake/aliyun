@@ -5,6 +5,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 
+/**
+ * 文件操作类
+ * @author liuwenbin
+ *
+ */
 public class FileUtil {
 	public static boolean saveFile(InputStream is, String fileName) {
 		FileOutputStream fos = null;
@@ -30,14 +35,25 @@ public class FileUtil {
 		}
 		return true;
 	}
-	
+	/**
+	 * 数据单位数组
+	 */
 	private static String[] sizeUnit = {"B","KB","MB","GB"};
 	
+	/**
+	 * 保留两位小数
+	 * @param d 数字
+	 * @return 保留两位小数后的数字
+	 */
 	public static String formatDouble(double d){
 		DecimalFormat df = new DecimalFormat("######0.00");
 		return df.format(d);
 	}
-	
+	/**
+	 * 获取大小
+	 * @param size 文件大小数值
+	 * @return 格式化后的文件大小，包含单位
+	 */
 	public static String getSize(long size){
 		double doubleSize = Double.parseDouble(size + "");
 		int index = 0;

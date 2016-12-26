@@ -1,10 +1,19 @@
 package com.aliyun.bean;
-
+/**
+ * oss文件类
+ * @author liuwenbin
+ *
+ */
 public class OssFile implements Comparable<OssFile>{
+	//文件名
 	private String fileName;
+	//文件当前路径
 	private String currentName;
+	//修改时间
 	private String modifyTime;
+	//文件大小
 	private String size;
+	//类型，0：文件；1：文件夹
 	private Integer type;
 	
 	public Integer getType() {

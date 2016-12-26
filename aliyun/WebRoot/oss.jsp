@@ -80,7 +80,6 @@
   			</table>
   		</div>
   	</div>
-  	<div id="bk" style="width:100%;height:100%;position:absolute;top:0px;left:0px;overflow:hidden;z-index:999;background-color:black;display:none"></div>
   </body>
   <script type="text/javascript">
   	var prefix = "";

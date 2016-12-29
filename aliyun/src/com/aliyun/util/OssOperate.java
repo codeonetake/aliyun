@@ -89,9 +89,6 @@ public class OssOperate {
 			}
 		}
 	}
-	public static void main(String[] args) {
-		System.out.println(fileExist("test-codeonetake", "1/1"));
-	}
 	/**
 	 * 获取所有的bucket
 	 * @return bucket对象列表

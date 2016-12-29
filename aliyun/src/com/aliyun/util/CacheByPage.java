@@ -11,7 +11,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class CacheByPage {
-	private static String[] cdnHead = {"http://i.codeonetake","http://cdn.codeonetake","http://img.codeonetake"};
+	private static String[] cdnHead = {"http://i.codeawl","http://cdn.codeawl","http://img.codeawl"};
 	public static Map<String, String> get(String url){
 		Map<String, String> result = new HashMap<String, String>();
 		try {
@@ -60,13 +60,6 @@ public class CacheByPage {
 			e.printStackTrace();
 		}
 		return result;
-	}
-	public static void main(String[] args) {
-		Map<String, String> map = get("http://i.codeonetake.com");
-		Set<String> keys = map.keySet();
-		for (String key : keys) {
-			System.out.println(key + " = " + map.get(key));
-		}
 	}
 	private static boolean isCdn(String url){
 		if(!url.startsWith("http")){

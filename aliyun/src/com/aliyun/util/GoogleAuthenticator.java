@@ -36,7 +36,6 @@ import org.apache.commons.codec.binary.Base64;
 
 public class GoogleAuthenticator {
     
-    // taken from Google pam docs - we probably don't need to mess with these
     public static final int SECRET_SIZE = 10;
     
     public static final String SEED = "g8GjEvTbW5oVSV7avLBdwIHqGlUYNzKFI7izOF8GwLDVKs2m0QN7vxRs2im5MDaNCWGmcD2rvcZx";
@@ -50,11 +49,7 @@ public class GoogleAuthenticator {
             window_size = s;
     }
     
- 
-    
     public static Boolean authcode(String codes, String savedSecret) {
-        // enter the code shown on device. Edit this and run it fast before the
-        // code expires!
         long code = 0;
         try {
 			code = Long.parseLong(codes);
@@ -98,27 +93,19 @@ public class GoogleAuthenticator {
     public boolean check_code(String secret, long code, long timeMsec) {
         Base32 codec = new Base32();
         byte[] decodedKey = codec.decode(secret);
-        // convert unix msec time into a 30 second "window"
-        // this is per the TOTP spec (see the RFC for details)
         long t = (timeMsec / 1000L) / 30L;
-        // Window is used to check codes generated in the near past.
-        // You can use this value to tune how far you're willing to go.
         for (int i = -window_size; i <= window_size; ++i) {
             long hash;
             try {
                 hash = verify_code(decodedKey, t + i);
             }catch (Exception e) {
-                // Yes, this is bad form - but
-                // the exceptions thrown would be rare and a static configuration problem
                 e.printStackTrace();
                 throw new RuntimeException(e.getMessage());
-                //return false;
             }
             if (hash == code) {
                 return true;
             }
         }
-        // The validation code is invalid.
         return false;
     }
     
@@ -133,12 +120,9 @@ public class GoogleAuthenticator {
         mac.init(signKey);
         byte[] hash = mac.doFinal(data);
         int offset = hash[20 - 1] & 0xF;
-        // We're using a long because Java hasn't got unsigned int.
         long truncatedHash = 0;
         for (int i = 0; i < 4; ++i) {
             truncatedHash <<= 8;
-            // We are dealing with signed bytes:
-            // we just keep the first byte.
             truncatedHash |= (hash[offset + i] & 0xFF);
         }
         truncatedHash &= 0x7FFFFFFF;

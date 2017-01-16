@@ -45,6 +45,10 @@ public class UploadBakService {
 		m("==========================");
 		bakMysql(bucketName,bakFileHead);
 		m("==========================");
+		bakRedis(bucketName,bakFileHead);
+		m("==========================");
+		bakMongo(bucketName,bakFileHead);
+		m("==========================");
 		delOverTimeFile(bucketName);
 		m("==========================");
 		m("总备份结束，总成功条数为：("+totalSuccessCount+")，总失败条数：("+totalFailCount+")");
@@ -429,9 +433,105 @@ public class UploadBakService {
 				shell = "rm -rf " + filePath; 
 				m("["+shell+"]");
 				DoShell.shell(shell);
-				m("备份MySql数据库开始成功结束");
+				m("备份MySql数据库成功结束");
 			} catch (Exception e) {
-				m("备份MySql数据库开始失败结束");
+				m("备份MySql数据库失败结束");
+				e.printStackTrace();
+			}
+		}else{
+			m("数据库配置为空，不备份");
+		}
+	}
+	
+	private static void bakRedis(String bucketName,String bakFileHead){
+		String shell = null;
+		String redisFileName = "/root/data/redis.json";
+		File redisFile = new File(redisFileName);
+		if(!redisFile.getParentFile().exists()){
+			redisFile.getParentFile().mkdirs();
+		}
+		m("(备份Redis数据库开始)");
+		m("备份配置如下：");
+		try {
+			shell = "redis-dump -u 127.0.0.1:6297 > " + redisFileName;
+			m("["+shell+"]");
+			DoShell.shell(shell);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		try {
+			m("上传Redis数据库文件开始");
+			String bakFileName = bakFileHead + "/redis/redis.json";
+			OssOperate.uploadFile(new File(redisFileName), bucketName, bakFileName, true);
+			m("上传Redis数据库文件结束");
+			shell = "rm -rf " + redisFileName;
+			m("["+shell+"]");
+			DoShell.shell(shell);
+			m("备份Redis数据库成功结束");
+		} catch (Exception e) {
+			m("备份Redis数据库失败结束");
+			e.printStackTrace();
+		}
+	}
+	
+	private static void bakMongo(String bucketName,String bakFileHead){
+		String shell = null;
+		String filePath = "/root/data/mongo/";
+		File dir = new File(filePath);
+		if(!dir.exists()){
+			dir.mkdirs();
+		}
+		m("(备份Mongo数据库开始)");
+		m("备份配置如下：");
+		String bakMongoDB = OssConfig.getValue("bakMongoDb");
+		m("bakMongoDB：" + bakMongoDB);
+		if(!"".equals(bakMongoDB)){
+			String[] dbs = bakMongoDB.split(";");
+			String userName = "";
+			String password = "";
+			String dbName = "";
+			String[] dbSplit = null;
+			for (String db : dbs) {
+				//./mongodump -h 127.0.0.1 --port 20000 -u test -p test -d lieche -o /Users/liuwenbin/Desktop/
+				if(!db.contains(":")){
+					dbName = db;
+					userName = "";
+					password = "";
+				}else{
+					dbSplit = db.split(":");
+					dbName = dbSplit[0];
+					userName = "-u " + dbSplit[1];
+					password = "-p " + dbSplit[2];
+				}
+				try {
+					shell = "mongodump -h 127.0.0.1 --port 27072 "+userName+" "+password+" -d "+dbName+" -o " + filePath;
+					System.out.println(shell);
+					m("["+shell+"]");
+					DoShell.shell(shell);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			try {
+				String temp = filePath.endsWith("/")?filePath.substring(0, filePath.length() - 1):filePath;
+				String tarFileName = "mongo.tar";
+				String tarFilePath = temp.substring(0,temp.lastIndexOf("/")) + "/" + tarFileName;
+				shell = "tar -zcPf " + tarFilePath + " " + filePath;
+				m("["+shell+"]");
+				DoShell.shell(shell);
+				m("上传Mongo数据库文件开始");
+				String bakFileName = bakFileHead + "/mongo/" + tarFileName;
+				OssOperate.uploadFile(new File(tarFilePath), bucketName, bakFileName, true);
+				m("上传Mongo数据库文件结束");
+				shell = "rm -rf " + tarFilePath;
+				m("["+shell+"]");
+				DoShell.shell(shell);
+				shell = "rm -rf " + filePath; 
+				m("["+shell+"]");
+				DoShell.shell(shell);
+				m("备份Mongo数据库成功结束");
+			} catch (Exception e) {
+				m("备份Mongo数据库失败结束");
 				e.printStackTrace();
 			}
 		}else{

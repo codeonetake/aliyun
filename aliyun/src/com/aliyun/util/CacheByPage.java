@@ -61,7 +61,7 @@ public class CacheByPage {
 		}
 		return result;
 	}
-	private static boolean isCdn(String url){
+	public static boolean isCdn(String url){
 		if(!url.startsWith("http")){
 			url = "http://" + url;
 		}

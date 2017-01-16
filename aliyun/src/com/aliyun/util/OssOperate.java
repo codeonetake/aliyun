@@ -21,6 +21,7 @@ import com.aliyun.oss.model.OSSObject;
 import com.aliyun.oss.model.OSSObjectSummary;
 import com.aliyun.oss.model.ObjectListing;
 import com.aliyun.oss.model.PutObjectRequest;
+import com.google.gson.Gson;
 
 /**
  * 阿里云oss基础操作类
@@ -313,6 +314,47 @@ public class OssOperate {
 			page.setNextMarker(newxNextMarker);
 			page.setSummrayList(summrayList);
 			return page;
+		}finally {
+			if (null != ossClient) {
+				ossClient.shutdown();
+			}
+		}
+	}
+	
+	public static List<String> listLastPage(String bucketName, Integer count) {
+		String key = "cdnCheckUrl";
+		if(count != -1){
+			if(RedisPool.isExist(key)){
+				return new Gson().fromJson(RedisPool.get(key), List.class);
+			}
+		}
+		OSSClient ossClient = null;
+		List<String> fileList = new ArrayList<String>();
+		try {
+			ossClient = getClient();
+			ObjectListing objectListing = null;
+			String nextMarker = "";
+			final int maxKeys = 1000;
+			String fileName = null;
+			do {
+				ListObjectsRequest listObjectsRequest = new ListObjectsRequest(bucketName).withPrefix("").withMarker(nextMarker).withMaxKeys(maxKeys);
+				objectListing = ossClient.listObjects(listObjectsRequest);
+				List<OSSObjectSummary> summrayList = objectListing.getObjectSummaries();
+				for (OSSObjectSummary ossObjectSummary : summrayList) {
+					fileName = ossObjectSummary.getKey();
+					if(fileName.endsWith("/")){
+						continue;
+					}
+					fileList.add(fileName);
+				}
+				nextMarker = objectListing.getNextMarker();
+			} while (objectListing.isTruncated());
+			if(count != -1){
+				Collections.reverse(fileList);
+				fileList = fileList.subList(0, count);
+				RedisPool.set(key, new Gson().toJson(fileList) ,24 * 60 * 60);
+			}
+			return fileList;
 		}finally {
 			if (null != ossClient) {
 				ossClient.shutdown();

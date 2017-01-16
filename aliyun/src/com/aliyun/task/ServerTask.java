@@ -33,9 +33,14 @@ public class ServerTask {
         }
     }
 	
-	@Scheduled(cron = "0 0/30 * * * ?")   
+	@Scheduled(cron = "0 0/9 * * * ?")   
     public void refreshCdn(){
 		CDNCacheService.refresh();
+		try {
+			CDNCacheService.refreshAllImg();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
     }
 	
 	@PostConstruct

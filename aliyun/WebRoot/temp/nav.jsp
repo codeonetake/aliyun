@@ -7,6 +7,7 @@
         <li><a href="/oss">OSS集群</a></li>
         <li><a href="/bak">服务器备份</a></li>
         <li><a href="/cdn">CDN管理</a></li>
+        <li><a href="/festival">节日管理</a></li>
       </ul>
     </div>
   </div>

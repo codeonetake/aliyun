@@ -7,11 +7,14 @@ import javax.annotation.PostConstruct;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.aliyun.bean.Festival;
 import com.aliyun.service.CDNCacheService;
+import com.aliyun.service.FestivalService;
 import com.aliyun.service.RestartTomcatService;
 import com.aliyun.service.UploadBakService;
 import com.aliyun.util.ObjSave;
 import com.aliyun.util.OssConfig;
+import com.aliyun.util.RedisPool;
 
 @Component
 public class ServerTask {
@@ -33,6 +36,13 @@ public class ServerTask {
         }
     }
 	
+	@Scheduled(cron = "0 0 0 * * *") 
+	public void changeFestival(){
+		System.out.println("修改节假日开启");
+		FestivalService.autoRunFestival();
+		System.out.println("修改节假日结束");
+	}
+	
 	@Scheduled(cron = "0 0/9 * * * ?")   
     public void refreshCdn(){
 		CDNCacheService.refresh();
@@ -53,5 +63,11 @@ public class ServerTask {
 			ObjSave.objectToFile("1|1", ruleFile);
 		}
 		System.out.println("add rule finish");
+		//
+		/*RedisPool.set("defaultBackColor", "55b3db");
+		RedisPool.set("defaultPicId", "16");
+		
+		RedisPool.set("currentBackColor", "55b3db");
+		RedisPool.set("currentPicId", "16");*/
 	}
 }

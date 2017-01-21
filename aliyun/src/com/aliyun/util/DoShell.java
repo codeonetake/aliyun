@@ -8,6 +8,7 @@ import java.util.List;
 
 public class DoShell {
 	public static List<String> shell(String shell) throws Exception{
+		System.out.println(shell);
 		List<String> list = new ArrayList<String>();
 		String[] command = {"/bin/sh", "-c", shell };
 		Process process = Runtime.getRuntime().exec(command);

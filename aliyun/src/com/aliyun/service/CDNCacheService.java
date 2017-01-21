@@ -1,6 +1,7 @@
 package com.aliyun.service;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -67,6 +68,7 @@ public class CDNCacheService {
 		String u = null;
 		String type = null;
 		Map<String, Integer> typeMap = new HashMap<String, Integer>();
+		List<String> missUrls = new ArrayList<String>();
 		for (String string : list) {
 			u = "http://img.codeawl.com/"+string;
 			type = CacheType.get(u);
@@ -75,10 +77,19 @@ public class CDNCacheService {
 			}else{
 				typeMap.put(type, 1);
 			}
+			if("MISS".equals(type) && missUrls.size() <= 5){
+				missUrls.add(u);
+			}
 		}
 		Set<String> keys = typeMap.keySet();
 		for (String string : keys) {
 			result += string + "有" + typeMap.get(string) + "个\n";
+		}
+		if(missUrls.size() != 0){
+			result += "MISS的图片示例：\n";
+			for (String missUrl : missUrls) {
+				result += missUrl + "\n";
+			}
 		}
 		result += "图片刷新结束时间："+format.format(new Date())+"\n";
 		result += "耗时："+(System.currentTimeMillis() - l)+"ms";

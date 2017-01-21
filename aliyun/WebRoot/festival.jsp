@@ -61,6 +61,8 @@
   		<button id="addFestivalBtn" class="btn btn-primary">添加节假日</button>
   		<button id="defaultBtn" class="btn btn-default">设置默认主题</button>
   		<a href="http://codeawl.com" target="_blank" class="btn btn-info">查看效果</a>
+  		<button id="addWeixinPicBtn" class="btn btn-info">上传图片</button>
+  		<input style="display:none" type="file" class="weixinPic" name="weixinPic" id="addWeixinPic"/>
   		<hr/>
   		<table class="table table-bordered" style="width:100%">
   			<tr>
@@ -117,11 +119,7 @@
 	        				<td>头像ID</td>
 	        				<td><input id="addPicId" name="addPicId" class="form-control"/></td>
 	        			</tr>
-	        			<%--<tr>
-	        				<td>二维码图片</td>
-	        				<td><input id="addWeixinPic" name="addWeixinPic" class="form-control"/></td>
-	        			</tr>
-	        		--%></table>
+	        			</table>
 	        		</form>
 	        </p>
 	      </div>
@@ -162,11 +160,7 @@
 	        				<td>头像ID</td>
 	        				<td><input id="changePicId" name="changePicId" class="form-control"/></td>
 	        			</tr>
-	        			<%--<tr>
-	        				<td>二维码图片</td>
-	        				<td><input id="changeWeixinPic" name="changeWeixinPic" class="form-control"/></td>
-	        			</tr>
-	        		--%></table>
+	        			</table>
 	        		</form>
 	        </p>
 	      </div>
@@ -179,9 +173,12 @@
 	</div><!-- /.modal -->
 	
   	<div id="bk" style="width:100%;height:100%;position:absolute;top:0px;left:0px;overflow:hidden;z-index:999;background-color:black;display:none"></div>
+  	<div id="uploadFileResult" style="display:none"></div>
   </body>
+  <script src="/js/fileUpload.js"></script>
   <script type="text/javascript">
   	$("#addFestivalBtn").click(function(){
+  		$(".weixinPic").val("");
   		$("#addDate").val("");
   		$("#addName").val("");
   		$("#addBackColor").val("");
@@ -218,6 +215,7 @@
   		$("#changeWeixinPic").val($("#id"+id+" .weixinPic").html());
   		$("#changeBackColorTd").css("backgroundColor","#"+$("#id"+id+" .backColor").html());
   		$("#changeFestivalId").val(id);
+  		$(".weixinPic").val("");
   		$("#changeModal").modal("show");
   	}
   	
@@ -274,5 +272,25 @@
   			}
   		});
   	});
+  	$("#addWeixinPicBtn").click(function(){
+  		$("#addWeixinPic").click();
+  	});
+  	$("#addWeixinPic").change(changeWeixinPic);
+  	function changeWeixinPic(){
+  		$.ajaxFileUpload({
+ 		     url:'/festival/uploadFileAjax',
+ 		     fileElementId:'addWeixinPic',
+ 		   	 dataType : 'text',
+ 		     success: function (data, status){
+ 		    	 	$("#uploadFileResult").html(data);
+ 		    	 	alert($("#uploadFileResult").text());
+ 		    	 	$("#addWeixinPic").change(changeWeixinPic);
+ 		     },
+ 		     error: function (data, status){
+ 		    		//错误处理
+ 		    		$("#addWeixinPic").change(changeWeixinPic);
+ 		     }
+ 		 });
+ 	}
   </script>
 </html>

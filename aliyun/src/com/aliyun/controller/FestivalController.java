@@ -1,17 +1,22 @@
 package com.aliyun.controller;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.aliyun.bean.Festival;
 import com.aliyun.service.FestivalService;
+import com.aliyun.util.OssConfig;
 import com.aliyun.util.RedisPool;
 
 @Controller
@@ -67,7 +72,7 @@ public class FestivalController {
 		String name = request.getParameter("changeName");
 		String backColor = request.getParameter("changeBackColor");
 		String picId = request.getParameter("changePicId");
-		String weixinPic = request.getParameter("changeWeixinPic");
+		String weixinPic = "";
 		
 		int id = 0;
 		try {
@@ -213,5 +218,39 @@ public class FestivalController {
 		}
 		out.flush();
 		out.close();
+	}
+	
+	@RequestMapping(value = "uploadFileAjax")
+	public void uploadFileAjax(@RequestParam MultipartFile weixinPic,
+			HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		request.setCharacterEncoding("UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+		try {
+			if (weixinPic != null && !weixinPic.isEmpty()) {
+				String originalFilename = weixinPic.getOriginalFilename();
+				if (null != originalFilename && originalFilename.endsWith(".png")) {
+					String newFileName = "";
+					if(originalFilename.startsWith("weixin_")){
+						newFileName = originalFilename;
+					}else{
+						newFileName = "weixin_"+originalFilename;
+					}
+					if(newFileName.length() != 17){
+						out.write("文件名有误");
+					}else{
+						FileUtils.copyInputStreamToFile(weixinPic.getInputStream(),new File(OssConfig.getValue("weixinPicPath"), newFileName));
+						out.write("上传成功，文件名为："+newFileName);
+					}
+				} else {
+					out.write("请上传png文件");
+					out.flush();
+					out.close();
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

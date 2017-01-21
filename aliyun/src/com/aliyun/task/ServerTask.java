@@ -7,14 +7,13 @@ import javax.annotation.PostConstruct;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.aliyun.bean.Festival;
 import com.aliyun.service.CDNCacheService;
+import com.aliyun.service.EmailService;
 import com.aliyun.service.FestivalService;
 import com.aliyun.service.RestartTomcatService;
 import com.aliyun.service.UploadBakService;
 import com.aliyun.util.ObjSave;
 import com.aliyun.util.OssConfig;
-import com.aliyun.util.RedisPool;
 
 @Component
 public class ServerTask {
@@ -34,13 +33,22 @@ public class ServerTask {
      		RestartTomcatService.start();
             System.out.println("定时重启结束");
         }
+        //发送报告
+        try {
+        		EmailService.sendEmail();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
     }
 	
 	@Scheduled(cron = "0 0 0 * * *") 
 	public void changeFestival(){
-		System.out.println("修改节假日开启");
+		System.out.println("修改节假日开始");
 		FestivalService.autoRunFestival();
 		System.out.println("修改节假日结束");
+		System.out.println("删除节假日多余图片开始");
+		FestivalService.deleteErrorImg();
+		System.out.println("删除节假日多余图片结束");
 	}
 	
 	@Scheduled(cron = "0 0/9 * * * ?")   

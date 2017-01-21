@@ -49,6 +49,8 @@ public class UploadBakService {
 		m("==========================");
 		bakMongo(bucketName,bakFileHead);
 		m("==========================");
+		bakAliyunData(bucketName, bakFileHead);
+		m("==========================");
 		delOverTimeFile(bucketName);
 		m("==========================");
 		m("总备份结束，总成功条数为：("+totalSuccessCount+")，总失败条数：("+totalFailCount+")");
@@ -131,7 +133,7 @@ public class UploadBakService {
 	}
 	
 	private static void bakTomcat(String bucketName,String bakFileHead){
-		m("(备份tomcat开始)");
+		m("备份tomcat开始");
 		m("备份配置如下：");
 		String tomcatsBakPath = OssConfig.getValue("tomcatsBakPath");
 		String manageTomcatPath = OssConfig.getValue("manageTomcatPath");
@@ -280,12 +282,12 @@ public class UploadBakService {
 		}else{
 			m("没有设置tomcat管理项目的路径，不进行备份");
 		}
-		m("(备份tomcat结束)");
+		m("备份tomcat结束");
 	}
 	
 	private static void bakNginxServer(String bucketName,String bakFileHead){
 		String shell = null;
-		m("(备份nginx服务器开始)");
+		m("备份nginx服务器开始");
 		m("备份配置如下：");
 		String nginxLog = OssConfig.getValue("nginxLog");
 		m("nginxLog："+nginxLog);
@@ -352,12 +354,35 @@ public class UploadBakService {
 		}else{
 			m("没有设置nginx服务器配置路径，不备份");
 		}
-		m("(备份nginx服务器结束)");
+		m("备份nginx服务器结束");
+	}
+	
+	private static void bakAliyunData(String bucketName,String bakFileHead){
+		String shell = null;
+		m("备份aliyun数据开始");
+		try {
+			String tarFilePath = "/root/data/aliyun.tar";
+			String dirFilePath = "/root/data/aliyun/";
+			shell = "tar -zcPf " + tarFilePath + " " + dirFilePath;
+			m("["+shell+"]");
+			DoShell.shell(shell);
+			String bakFileName = bakFileHead + "/data/aliyun.tar";
+			m("上传aliyun数据开始");
+			OssOperate.uploadFile(new File(tarFilePath)	, bucketName, bakFileName, true);
+			m("上传aliyun数据结束");
+			//清理文件
+			shell = "rm -rf " + tarFilePath;
+			m("["+shell+"]");
+			DoShell.shell(shell);
+			m("备份aliyun数据成功结束");
+		} catch (Exception e) {
+			m("备份aliyun数据失败结束");
+		}
 	}
 	
 	private static void bakNginxProj(String bucketName,String bakFileHead){
 		String shell = null;
-		m("(备份nginx服务器项目开始)");
+		m("备份nginx服务器项目开始");
 		String nginxProjs = OssConfig.getValue("nginxProjs");
 		String[] nginxs = nginxProjs.split(";");
 		String[] proj = null;
@@ -388,7 +413,7 @@ public class UploadBakService {
 			}
 			m("");
 		}
-		m("(备份nginx服务器项目结束)");
+		m("备份nginx服务器项目结束");
 	}
 	
 	private static void bakMysql(String bucketName,String bakFileHead){
@@ -398,7 +423,7 @@ public class UploadBakService {
 		if(!dir.exists()){
 			dir.mkdirs();
 		}
-		m("(备份MySql数据库开始)");
+		m("备份MySql数据库开始");
 		m("备份配置如下：");
 		String bakMysqlDB = OssConfig.getValue("bakMysqlDB");
 		m("bakMysqlDB：" + bakMysqlDB);
@@ -450,7 +475,7 @@ public class UploadBakService {
 		if(!redisFile.getParentFile().exists()){
 			redisFile.getParentFile().mkdirs();
 		}
-		m("(备份Redis数据库开始)");
+		m("备份Redis数据库开始");
 		m("备份配置如下：");
 		try {
 			shell = "redis-dump -u 127.0.0.1:6297 > " + redisFileName;
@@ -481,7 +506,7 @@ public class UploadBakService {
 		if(!dir.exists()){
 			dir.mkdirs();
 		}
-		m("(备份Mongo数据库开始)");
+		m("备份Mongo数据库开始");
 		m("备份配置如下：");
 		String bakMongoDB = OssConfig.getValue("bakMongoDb");
 		m("bakMongoDB：" + bakMongoDB);

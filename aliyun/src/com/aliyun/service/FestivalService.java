@@ -1,5 +1,6 @@
 package com.aliyun.service;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -8,25 +9,52 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.aliyun.bean.CalendarDay;
 import com.aliyun.bean.Festival;
 import com.aliyun.util.CalendarUtil;
 import com.aliyun.util.DoShell;
 import com.aliyun.util.ObjSave;
+import com.aliyun.util.OssConfig;
 import com.aliyun.util.RedisPool;
 
 public class FestivalService {
 	private static String msg = "";
 	private static SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private static SimpleDateFormat yearMonthFormat = new SimpleDateFormat("MM-dd");
 	private static SimpleDateFormat format = new SimpleDateFormat("yyyy-M-d");
 	private static String url = "jdbc:mysql://59.110.54.171:3056/wordpress?"+ "user=root&password=root_liuwenbin&useUnicode=true&characterEncoding=UTF8";
+	
+	public static void deleteErrorImg(){
+		List<Festival> festivals = null;
+		try {
+			festivals = getAll();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if(null == festivals){
+			return;
+		}
+		Set<String> fileNames = new HashSet<String>();
+		for (Festival festival : festivals) {
+			fileNames.add("weixin_"+festival.getBackColor()+".png");
+		}
+		File[] files = new File(OssConfig.getValue("weixinPicPath")).listFiles();
+		for (File file : files) {
+			if(!fileNames.contains(file.getName())){
+				file.delete();
+			}
+		}
+	}
 	
 	public static void autoRunFestival(){
 		m("判断节日开始");
 		Date now = new Date();
 		String date_yl = format.format(now);
+		String date_yl_ym = yearMonthFormat.format(now);
 		String date_nl = "";
 		CalendarDay calendarDay = null;
 		
@@ -39,11 +67,11 @@ public class FestivalService {
 		try {
 			calendarDay = CalendarUtil.getCalendar(date_yl);
 			date_nl = calendarDay.getResult().getData().getLunar();
-			inStatus = "'"+date_nl+"','"+date_yl+"'";
-			m("日期："+date_yl+" "+date_nl);
+			inStatus = "'"+date_nl+"','"+date_yl_ym+"'";
+			m("日期："+date_yl_ym+" "+date_nl);
 		} catch (Exception e) {
-			inStatus = "'"+date_yl+"'";
-			m("日期："+date_yl+" "+date_nl);
+			inStatus = "'"+date_yl_ym+"'";
+			m("日期："+date_yl_ym);
 		}
 		Festival festival = null;
 		try {
@@ -86,17 +114,16 @@ public class FestivalService {
 		}
 		ObjSave.objectToFile(msg, "/root/data/aliyun/festival.ser");
 	}
+	
 	public static void main(String[] args) {
-		String msg = ObjSave.fileToObject("/root/data/aliyun/festival.ser").toString();
+		autoRunFestival();
 		System.out.println(msg);
 	}
+	
 	public static void copyPic(String colorName){
-		String fromPic = "/root/data/aliyun/image/weixin_"+colorName+".png";
+		String fromPic = OssConfig.getValue("weixinPicPath")+"weixin_"+colorName+".png";
 		String toPic = "/usr/share/nginx/html/image/weixin.png";
-		//toPic = "/Users/liuwenbin/Desktop/image/weixin.png";
 		try {
-			//DoShell.shell("rm -rf "+toPic);
-			//Thread.sleep(500);
 			DoShell.shell("cp -r -f "+fromPic+" "+toPic);
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -16,6 +16,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.aliyun.bean.Festival;
 import com.aliyun.service.FestivalService;
+import com.aliyun.util.ObjSave;
 import com.aliyun.util.OssConfig;
 import com.aliyun.util.RedisPool;
 
@@ -28,6 +29,8 @@ public class FestivalController {
 		ModelAndView mav = new ModelAndView();
 		mav.setViewName("festival");
 		mav.addObject("festivals", FestivalService.getAll());
+		String festivalInfo = ObjSave.fileToObject("/root/data/aliyun/festival.ser").toString();
+		mav.addObject("festivalInfo", festivalInfo);
 		return mav;
 	}
 	

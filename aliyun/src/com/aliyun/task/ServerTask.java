@@ -7,6 +7,7 @@ import javax.annotation.PostConstruct;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.aliyun.service.BaiduCountService;
 import com.aliyun.service.CDNCacheService;
 import com.aliyun.service.EmailService;
 import com.aliyun.service.FestivalService;
@@ -22,18 +23,34 @@ public class ServerTask {
 		
 	@Scheduled(cron = "0 10 0 * * *")   
     public void show(){
+		System.out.println("获取百度收录开始");
+		try {
+			BaiduCountService.get();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		System.out.println("获取百度收录结束");
 		String rules = (String)ObjSave.fileToObject(ruleFile);
 		if(rules.startsWith("1")){
 			System.out.println("定时备份开启");
 			UploadBakService.uploadBak();
 	        System.out.println("定时备份结束");
 		}
+		try {
+			//先暂停一分钟再执行重启tomcat，以防止重启之后时间为00:10，还会执行一次备份。
+			Thread.sleep(60000);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
         if(rules.endsWith("1")){
         	 	System.out.println("定时重启开启");
      		RestartTomcatService.start();
             System.out.println("定时重启结束");
         }
-        //发送报告
+    }
+	
+	@Scheduled(cron = "0 20 0 * * *")   
+    public void sendEmail(){
         try {
         		EmailService.sendEmail();
 		} catch (Exception e) {

@@ -12,9 +12,10 @@ public class EmailService {
 		String cdn = ObjSave.fileToObject("/root/data/aliyun/cdn.ser").toString();
 		String imgCdn = ObjSave.fileToObject("/root/data/aliyun/imgCdn.ser").toString();
 		String festival = ObjSave.fileToObject("/root/data/aliyun/festival.ser").toString();
+		String baiduCount = ObjSave.fileToObject("/root/data/aliyun/baiduCount.ser").toString();
 		EmailUtil.sendEmail("服务器备份重启等信息", bakInfo
 				+"<br/>----------------<br/>"+restartInfo+"<br/>----------------<br/>"
 				+cdn+"<br/>----------------<br/>"+imgCdn+"<br/>----------------<br/>"
-				+festival, "codeawl@163.com");
+				+festival+"<br/>----------------<br/>"+baiduCount, "codeawl@163.com");
 	}
 }

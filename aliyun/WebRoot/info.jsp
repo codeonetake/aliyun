@@ -6,7 +6,7 @@
 <html>
   <head>
     
-    <title>节日管理</title>
+    <title>信息查询</title>
 	<meta http-equiv="pragma" content="no-cache">
 	<meta http-equiv="cache-control" content="no-cache">
 	<meta http-equiv="expires" content="0">    
@@ -58,126 +58,14 @@
   <body>
   	<jsp:include page="temp/nav.jsp"></jsp:include>
   	<div class="container" style="width:88%;margin-top:30px">
-  		<button id="addFestivalBtn" class="btn btn-primary">添加节假日</button>
-  		<button id="defaultBtn" class="btn btn-default">设置默认主题</button>
-  		<a href="http://codeawl.com" target="_blank" class="btn btn-info">查看效果</a>
-  		<button id="addWeixinPicBtn" class="btn btn-info">上传图片</button>
-  		<input style="display:none" type="file" class="weixinPic" name="weixinPic" id="addWeixinPic"/>
-  		<hr/>
-  		<div class="alert alert-success" role="alert">
-  			${festivalInfo}
-  		</div>
-  		<hr/>
-  		<table class="table table-bordered" style="width:100%">
-  			<tr>
-  				<td>id</td>
-  				<td>日期</td>
-  				<td>名称</td>
-  				<td>背景颜色</td>
-  				<td>头像ID</td>
-  				<%--<td>二维码地址</td>
-  				--%><td>创建时间</td>
-  				<td>修改时间</td>
-  				<td>操作</td>
-  			</tr>
-  			<c:forEach items="${festivals}" var="festival">
-  			<tr id="id${festival.id}">
-  				<td class="id">${festival.id}</td>
-  				<td class="date">${festival.date}</td>
-  				<td class="name">${festival.name}</td>
-  				<td class="backColor" style="background-color: #${festival.backColor}">${festival.backColor}</td>
-  				<td class="picId">${festival.picId}</td>
-  				<%--<td class="weixinPic">${festival.weixinPic}</td>
-  				--%><td class="createTime">${festival.createTime}</td>
-  				<td class="modifyTime">${festival.modifyTime}</td>
-  				<td><a href="javascript:;" onclick="changeFestival('${festival.id}')">修改</a> | <a href="javascript:;" onclick="delFestival('${festival.id}')">删除</a>  | <a href="javascript:;" onclick="exeFestival('${festival.id}')">执行</a> </td>
-  			</tr>
-  			</c:forEach>
-  		</table>
+  		<c:forEach items="${content}" var="c">
+  			${c.key}
+  			<div class="alert alert-default" role="alert">
+	  			${c.value}
+	  		</div>
+	  		<br/>
+  		</c:forEach>
   	</div>
-  	
-  	<div id="addModal" class="modal fade">
-	  <div class="modal-dialog" style="width:50%">
-	    <div class="modal-content">
-	      <div class="modal-header">
-	        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-	        <h4 class="modal-title">添加节假日</h4>
-	      </div>
-	      <div class="modal-body">
-	        <p>
-	        		<form id="addFestivalForm">
-	        		<table class="table table-bordered" style="width:100%">
-	        			<tr>
-	        				<td>日期</td>
-	        				<td><input id="addDate" name="addDate" class="form-control"/></td>
-	        			</tr>
-	        			<tr>
-	        				<td>名称</td>
-	        				<td><input id="addName" name="addName" class="form-control"/></td>
-	        			</tr>
-	        			<tr>
-	        				<td>背景颜色</td>
-	        				<td id="addBackColorTd"><input id="addBackColor" name="addBackColor" class="form-control"/></td>
-	        			</tr>
-	        			<tr>
-	        				<td>头像ID</td>
-	        				<td><input id="addPicId" name="addPicId" class="form-control"/></td>
-	        			</tr>
-	        			</table>
-	        		</form>
-	        </p>
-	      </div>
-	      <div class="modal-footer">
-	      	<button id="addForm" type="button" class="btn btn-primary">添加</button>
-	        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-	      </div>
-	    </div><!-- /.modal-content -->
-	 </div><!-- /.modal-dialog -->
-	</div><!-- /.modal -->
-	
-	
-	<div id="changeModal" class="modal fade">
-	  <div class="modal-dialog" style="width:50%">
-	    <div class="modal-content">
-	      <div class="modal-header">
-	        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-	        <h4 class="modal-title">修改节假日</h4>
-	      </div>
-	      <div class="modal-body">
-	        <p>
-	        		<form id="changeFestivalForm">
-	        		<input id="changeFestivalId" type="hidden" name="changeId"/>
-	        		<table class="table table-bordered" style="width:100%">
-	        			<tr>
-	        				<td>日期</td>
-	        				<td><input id="changeDate" name="changeDate" class="form-control"/></td>
-	        			</tr>
-	        			<tr>
-	        				<td>名称</td>
-	        				<td><input id="changeName" name="changeName" class="form-control"/></td>
-	        			</tr>
-	        			<tr>
-	        				<td>背景颜色</td>
-	        				<td id="changeBackColorTd"><input id="changeBackColor" name="changeBackColor" class="form-control"/></td>
-	        			</tr>
-	        			<tr>
-	        				<td>头像ID</td>
-	        				<td><input id="changePicId" name="changePicId" class="form-control"/></td>
-	        			</tr>
-	        			</table>
-	        		</form>
-	        </p>
-	      </div>
-	      <div class="modal-footer">
-	      	<button id="changeForm" type="button" class="btn btn-primary">修改</button>
-	        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-	      </div>
-	    </div><!-- /.modal-content -->
-	 </div><!-- /.modal-dialog -->
-	</div><!-- /.modal -->
-	
-  	<div id="bk" style="width:100%;height:100%;position:absolute;top:0px;left:0px;overflow:hidden;z-index:999;background-color:black;display:none"></div>
-  	<div id="uploadFileResult" style="display:none"></div>
   </body>
   <script src="/js/fileUpload.js"></script>
   <script type="text/javascript">

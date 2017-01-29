@@ -19,7 +19,7 @@ public class CdnUtil {
 		format.setTimeZone(TimeZone.getTimeZone("UTC"));
 		String url = "https://cdn.aliyuncs.com/?";
 		TreeMap<String, String> treeMap = new TreeMap<String, String>();
-		treeMap.put("Action", "DescribeDomainHttpCodeData");
+		treeMap.put("Action", "DescribeDomainQpsData");
 		//treeMap.put("DomainName", "img.codeawl.com");
 		treeMap.put("Format", "JSON");
 		treeMap.put("Version", "2014-11-11");

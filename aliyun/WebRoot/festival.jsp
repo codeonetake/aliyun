@@ -64,6 +64,8 @@
   		<button id="addWeixinPicBtn" class="btn btn-info">上传图片</button>
   		<input style="display:none" type="file" class="weixinPic" name="weixinPic" id="addWeixinPic"/>
   		<hr/>
+  		当前使用的是<b><font color="#${currentFestival.backColor}">${currentFestival.name}</font></b>主题
+  		<hr/>
   		<div class="alert alert-success" role="alert">
   			${festivalInfo}
   		</div>

@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.aliyun.bean.CDNDetail;
+import com.aliyun.bean.CDNTongji;
 import com.aliyun.bean.ImgCdn;
 import com.aliyun.util.CacheByPage;
 import com.aliyun.util.CacheType;
@@ -20,6 +22,8 @@ import com.google.gson.Gson;
 public class CDNCacheService {
 	private static String msg = "";
 	private static SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private static SimpleDateFormat timeFormat = new SimpleDateFormat("MM-dd HH:mm");
+	private static int maxCount = 168;
 	
 	public static void refresh(){
 		msg="";
@@ -28,18 +32,62 @@ public class CDNCacheService {
 		m("检测CDN的url开始");
 		Map<String, String> maps = null;
 		Set<String> keys = null;
+		Map<String, Integer> typeCountMap = new HashMap<String, Integer>();
+		String type = null;
+		Integer typeCount = 1;
 		for (String u : urls) {
 			u = "http://"+u;
 			m("当前测试的URL：" + u);
 			maps = CacheByPage.get(u);
 			keys = maps.keySet();
 			for (String key : keys) {
-				m(key + "，状态：" + maps.get(key));
+				type = maps.get(key);
+				m(key + "，状态：" + type);
+				typeCount = typeCountMap.get(type);
+				if(typeCount == null){
+					typeCountMap.put(type, 1);
+				}else{
+					typeCountMap.put(type, typeCount + 1);
+				}
 			}
 			m("====================");
 		}
 		m("检测CDN的url结束");
 		ObjSave.objectToFile(msg, "/root/data/aliyun/cdn.ser");
+		//添加统计
+		String redisKey = "CDNTongji";
+		String tongjiJson = RedisPool.get(redisKey);
+		CDNDetail imgCDNDetail = new CDNDetail();
+		Integer hitCount = typeCountMap.get("HIT");
+		if(hitCount == null){
+			hitCount = 0;
+		}
+		imgCDNDetail.setHitCount(hitCount);
+		
+		Integer missCount = typeCountMap.get("MISS");
+		if(missCount == null){
+			missCount = 0;
+		}
+		imgCDNDetail.setMissCount(missCount);
+		imgCDNDetail.setTime(timeFormat.format(new Date()));
+		
+		CDNTongji imgCDNTongji = null;
+		if(null != tongjiJson){
+			imgCDNTongji = new Gson().fromJson(tongjiJson, CDNTongji.class);
+			List<CDNDetail> details = imgCDNTongji.getDetails();
+			int size = details.size();
+			if(details.size()>maxCount){
+				details = details.subList(size - maxCount,size);
+			}
+			details.add(imgCDNDetail);
+			imgCDNTongji.setDetails(details);
+		}else{
+			imgCDNTongji = new CDNTongji();
+			List<CDNDetail> details = new ArrayList<CDNDetail>();
+			details.add(imgCDNDetail);
+			imgCDNTongji.setDetails(details);
+		}
+		RedisPool.set(redisKey, new Gson().toJson(imgCDNTongji));
 	}
 	
 	public static void refreshAllImg(){
@@ -85,6 +133,7 @@ public class CDNCacheService {
 		for (String string : keys) {
 			result += string + "有" + typeMap.get(string) + "个\n";
 		}
+		
 		if(missUrls.size() != 0){
 			result += "MISS的图片示例：\n";
 			for (String missUrl : missUrls) {
@@ -94,6 +143,43 @@ public class CDNCacheService {
 		result += "图片刷新结束时间："+format.format(new Date())+"\n";
 		result += "耗时："+(System.currentTimeMillis() - l)+"ms";
 		ObjSave.objectToFile(result, "/root/data/aliyun/imgCdn.ser");
+		//添加统计信息
+		String redisKey = "imgCDNTongji";
+		String tongjiJson = RedisPool.get(redisKey);
+		CDNDetail imgCDNDetail = new CDNDetail();
+		Integer hitCount = typeMap.get("HIT");
+		if(hitCount == null){
+			hitCount = 0;
+		}
+		imgCDNDetail.setHitCount(hitCount);
+		
+		Integer missCount = typeMap.get("MISS");
+		if(missCount == null){
+			missCount = 0;
+		}
+		imgCDNDetail.setMissCount(missCount);
+		imgCDNDetail.setTime(timeFormat.format(new Date()));
+		
+		CDNTongji imgCDNTongji = null;
+		if(null != tongjiJson){
+			imgCDNTongji = new Gson().fromJson(tongjiJson, CDNTongji.class);
+			List<CDNDetail> details = imgCDNTongji.getDetails();
+			int size = details.size();
+			if(details.size()>maxCount){
+				details = details.subList(size - maxCount,size);
+			}
+			details.add(imgCDNDetail);
+			imgCDNTongji.setDetails(details);
+		}else{
+			imgCDNTongji = new CDNTongji();
+			List<CDNDetail> details = new ArrayList<CDNDetail>();
+			details.add(imgCDNDetail);
+			imgCDNTongji.setDetails(details);
+		}
+		RedisPool.set(redisKey, new Gson().toJson(imgCDNTongji));
+	}
+	public static void main(String[] args) {
+		refreshAllImg();
 	}
 	
 	private static void m(String content){

@@ -17,6 +17,13 @@
         <li><a href="/cdn">CDN管理</a></li>
         <li><a href="/festival">节日管理</a></li>
         <li><a href="/info">信息查询</a></li>
+        <li class="dropdown">
+          <a href="javascript" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">数据统计<span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="/tongji/cdn">CDN统计</a></li>
+            <li><a href="/tongji/baidu">百度统计</a></li>
+          </ul>
+        </li>
       </ul>
     </div>
   </div>

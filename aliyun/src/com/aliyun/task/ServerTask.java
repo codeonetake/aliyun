@@ -11,6 +11,7 @@ import com.aliyun.service.BaiduCountService;
 import com.aliyun.service.CDNCacheService;
 import com.aliyun.service.EmailService;
 import com.aliyun.service.FestivalService;
+import com.aliyun.service.MipService;
 import com.aliyun.service.RestartTomcatService;
 import com.aliyun.service.UploadBakService;
 import com.aliyun.util.ObjSave;
@@ -23,6 +24,13 @@ public class ServerTask {
 		
 	@Scheduled(cron = "0 10 0 * * *")   
     public void show(){
+		System.out.println("提交MIP开始");
+		try {
+			MipService.submitMipUrl();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		System.out.println("提交MIP结束");
 		System.out.println("获取百度收录开始");
 		try {
 			BaiduCountService.get();

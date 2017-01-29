@@ -59,11 +59,12 @@
   	<jsp:include page="temp/nav.jsp"></jsp:include>
   	<div class="container" style="width:88%;margin-top:30px">
   		<c:forEach items="${content}" var="c">
-  			${c.key}
-  			<div class="alert alert-default" role="alert">
-	  			${c.value}
-	  		</div>
-	  		<br/>
+  			<div class="panel panel-primary">
+			  <div class="panel-heading">${c.key}</div>
+			  <div class="panel-body" style="word-break: break-all;">
+			    ${c.value}
+			  </div>
+			</div>
   		</c:forEach>
   	</div>
   </body>

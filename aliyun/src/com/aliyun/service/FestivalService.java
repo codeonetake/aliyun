@@ -42,6 +42,8 @@ public class FestivalService {
 		for (Festival festival : festivals) {
 			fileNames.add("weixin_"+festival.getBackColor()+".png");
 		}
+		//添加默认的图片名称
+		fileNames.add("weixin_"+RedisPool.get("defaultBackColor")+".png");
 		File[] files = new File(OssConfig.getValue("weixinPicPath")).listFiles();
 		for (File file : files) {
 			if(!fileNames.contains(file.getName())){
@@ -346,6 +348,45 @@ public class FestivalService {
         }
         return festival;
 	}
+	
+	public static Festival getByBackColor(String color) throws Exception{
+		Connection conn = null;
+        Statement stmt = null;
+        String sql;
+        Festival festival = null;
+        try {
+            Class.forName("com.mysql.jdbc.Driver");// 动态加载mysql驱动
+            conn = DriverManager.getConnection(url);
+            stmt = conn.createStatement();
+            sql = "select * from wp_festival where backColor='"+color+"'";
+            ResultSet rs = stmt.executeQuery(sql);
+            while(rs.next()){
+            		festival = new Festival();
+            		festival.setBackColor(rs.getString("backColor"));
+            		festival.setCreateTime(rs.getTimestamp("createTime"));
+            		festival.setDate(rs.getString("date"));
+            		festival.setId(rs.getInt("id"));
+            		festival.setModifyTime(rs.getTimestamp("modifyTime"));
+            		festival.setName(rs.getString("name"));
+            		festival.setPicId(rs.getString("picId"));
+            		festival.setWeixinPic(rs.getString("weixinPic"));
+            		break;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+        		if(null != stmt){
+        			stmt.close();
+        		}
+        		if(null != conn){
+        			conn.close();
+        		}
+        }
+        return festival;
+	}
+	
 	private static void m(String content){
 		if(content.contains("(")){
 			content = content.replaceAll("\\(", "<b>");

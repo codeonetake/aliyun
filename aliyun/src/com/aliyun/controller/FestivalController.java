@@ -31,6 +31,14 @@ public class FestivalController {
 		mav.addObject("festivals", FestivalService.getAll());
 		String festivalInfo = ObjSave.fileToObject("/root/data/aliyun/festival.ser").toString();
 		mav.addObject("festivalInfo", festivalInfo);
+		String currentBackColor = RedisPool.get("currentBackColor");
+		Festival festival = FestivalService.getByBackColor(currentBackColor);
+		if(null == festival){
+			festival = new Festival();
+			festival.setName("默认");
+			festival.setBackColor(RedisPool.get("defaultBackColor"));
+		}
+		mav.addObject("currentFestival", festival);
 		return mav;
 	}
 	

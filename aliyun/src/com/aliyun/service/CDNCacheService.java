@@ -76,7 +76,7 @@ public class CDNCacheService {
 			imgCDNTongji = new Gson().fromJson(tongjiJson, CDNTongji.class);
 			List<CDNDetail> details = imgCDNTongji.getDetails();
 			int size = details.size();
-			if(details.size()>maxCount){
+			if(size>maxCount){
 				details = details.subList(size - maxCount,size);
 			}
 			details.add(imgCDNDetail);
@@ -165,7 +165,7 @@ public class CDNCacheService {
 			imgCDNTongji = new Gson().fromJson(tongjiJson, CDNTongji.class);
 			List<CDNDetail> details = imgCDNTongji.getDetails();
 			int size = details.size();
-			if(details.size()>maxCount){
+			if(size>maxCount){
 				details = details.subList(size - maxCount,size);
 			}
 			details.add(imgCDNDetail);

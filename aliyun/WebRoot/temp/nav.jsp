@@ -22,6 +22,7 @@
           <ul class="dropdown-menu">
             <li><a href="/tongji/cdn">CDN统计</a></li>
             <li><a href="/tongji/baidu">百度统计</a></li>
+            <li><a href="/tongji/system">系统统计</a></li>
           </ul>
         </li>
       </ul>

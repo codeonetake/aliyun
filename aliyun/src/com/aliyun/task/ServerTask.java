@@ -13,6 +13,7 @@ import com.aliyun.service.EmailService;
 import com.aliyun.service.FestivalService;
 import com.aliyun.service.MipService;
 import com.aliyun.service.RestartTomcatService;
+import com.aliyun.service.SystemService;
 import com.aliyun.service.UploadBakService;
 import com.aliyun.util.ObjSave;
 import com.aliyun.util.OssConfig;
@@ -86,6 +87,15 @@ public class ServerTask {
 		}
     }
 	
+	@Scheduled(cron = "0 0/5 * * * ?")   
+    public void getSystemTongji(){
+		try {
+			SystemService.get();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+    }
+	
 	@PostConstruct
 	public void init(){
 		System.out.println("start tomcat aliyun");
@@ -96,11 +106,5 @@ public class ServerTask {
 			ObjSave.objectToFile("1|1", ruleFile);
 		}
 		System.out.println("add rule finish");
-		//
-		/*RedisPool.set("defaultBackColor", "55b3db");
-		RedisPool.set("defaultPicId", "16");
-		
-		RedisPool.set("currentBackColor", "55b3db");
-		RedisPool.set("currentPicId", "16");*/
 	}
 }

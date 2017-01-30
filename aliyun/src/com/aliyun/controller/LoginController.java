@@ -2,6 +2,7 @@ package com.aliyun.controller;
 
 import java.io.PrintWriter;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -24,11 +25,11 @@ public class LoginController {
 		String password = request.getParameter("password");
 		System.out.println("password:"+password);
 		if(null != password && GoogleAuthenticator.authcode(password, "OHXU6PLMZMDJIDY2")){
-			System.out.println("success");
 			out.write("success");
-			session.setAttribute("user", "OK");
+			Cookie cookie = new Cookie("isLogin", "1");
+			cookie.setMaxAge(60 * 60 * 24 *30);
+			response.addCookie(cookie);
 		}else{
-			System.out.println("error");
 			out.write("error");
 		}
 		out.flush();

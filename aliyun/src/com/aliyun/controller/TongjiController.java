@@ -13,6 +13,9 @@ import com.aliyun.bean.BaiduDetail;
 import com.aliyun.bean.BaiduTongji;
 import com.aliyun.bean.CDNDetail;
 import com.aliyun.bean.CDNTongji;
+import com.aliyun.bean.DiskTongji;
+import com.aliyun.bean.MemDetail;
+import com.aliyun.bean.MemTongji;
 import com.aliyun.util.RedisPool;
 import com.google.gson.Gson;
 
@@ -83,6 +86,43 @@ public class TongjiController {
 		mav.addObject("baiduCount",baiduCount);
 		mav.addObject("time",time);
 		mav.setViewName("/baiduTongji");
+		return mav;
+	}
+	
+	@RequestMapping(value="/system")
+	public ModelAndView systemTongji(HttpServletRequest request,HttpServletResponse httpServletResponse) throws Exception{
+		ModelAndView mav = new ModelAndView();
+		String memTongjiJson = RedisPool.get("memTongji");
+		MemTongji memTongji = new Gson().fromJson(memTongjiJson, MemTongji.class);
+		String usedCount = "[";
+		String buffCount = "[";
+		String cachCount = "[";
+		String freeCount = "[";
+		String time = "[";
+		List<MemDetail> details = memTongji.getDetails();
+		int mSize = details.size();
+		for (MemDetail memDetail : details) {
+			usedCount += memDetail.getUsed() + ",";
+			buffCount += memDetail.getBuff() + ",";
+			cachCount += memDetail.getCach() + ",";
+			freeCount += memDetail.getFree() + ",";
+			time += "'"+memDetail.getTime() + "',";
+		}
+		usedCount = usedCount.substring(0,usedCount.length() - 1)+"]";
+		buffCount = buffCount.substring(0,buffCount.length() - 1)+"]";
+		cachCount = cachCount.substring(0,cachCount.length() - 1)+"]";
+		freeCount = freeCount.substring(0,freeCount.length() - 1)+"]";
+		time = time.substring(0,time.length() - 1)+"]";
+		mav.addObject("usedCount",usedCount);
+		mav.addObject("buffCount",buffCount);
+		mav.addObject("cachCount",cachCount);
+		mav.addObject("freeCount",freeCount);
+		mav.addObject("time",time);
+		
+		DiskTongji diskTongji = new Gson().fromJson(RedisPool.get("diskTongji"), DiskTongji.class);
+		mav.addObject("diskTongji", diskTongji);
+		mav.addObject("memDetail", details.get(mSize - 1));
+		mav.setViewName("/systemTongji");
 		return mav;
 	}
 }

@@ -1,5 +1,6 @@
 package com.aliyun.interceptor;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -24,12 +25,18 @@ public class LoginInterceptor implements HandlerInterceptor{
 
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
 			Object arg2) throws Exception {
-		HttpSession session = request.getSession();
-		if(null == session.getAttribute("user")){
-			response.sendRedirect("/");
-			return false;
+		Cookie[] cookies = request.getCookies();
+		boolean result = false;
+		if(null == cookies){
+			return result;
 		}
-		return true;
+		for (Cookie cookie : cookies) {
+			if(cookie.getName().equals("isLogin") && "1".equals(cookie.getValue())){
+				result = true;
+				break;
+			}
+		}
+		return result;
 	}
 	
 }

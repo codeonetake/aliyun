@@ -7,12 +7,17 @@ import javax.annotation.PostConstruct;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.aliyun.service.ArticleService;
 import com.aliyun.service.BaiduCountService;
+import com.aliyun.service.BaiduSpiderService;
 import com.aliyun.service.CDNCacheService;
 import com.aliyun.service.EmailService;
 import com.aliyun.service.FestivalService;
+import com.aliyun.service.LogService;
 import com.aliyun.service.MipService;
+import com.aliyun.service.MoneyService;
 import com.aliyun.service.RestartTomcatService;
+import com.aliyun.service.ShellService;
 import com.aliyun.service.SystemService;
 import com.aliyun.service.UploadBakService;
 import com.aliyun.util.ObjSave;
@@ -60,11 +65,23 @@ public class ServerTask {
 	
 	@Scheduled(cron = "0 20 0 * * *")   
     public void sendEmail(){
+		ShellService.cleanMemery();
         try {
         		EmailService.sendEmail();
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
+    }
+	
+	@Scheduled(cron = "0 0 22 * * *")   
+    public void checkMoney(){
+		System.out.println("check money start");
+        try {
+        		MoneyService.checkTodayStatus();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+        System.out.println("check money end");
     }
 	
 	@Scheduled(cron = "0 0 0 * * *") 
@@ -88,12 +105,35 @@ public class ServerTask {
     }
 	
 	@Scheduled(cron = "0 0/5 * * * ?")   
+    public void getLogTongji(){
+		try {
+			LogService.get();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+    }
+	
+	@Scheduled(cron = "0 0/3 * * * ?")   
     public void getSystemTongji(){
 		try {
 			SystemService.get();
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
+    }
+	
+	@Scheduled(cron = "0 0/30 * * * ?")   
+    public void getBaiduSpider(){
+		try {
+			BaiduSpiderService.getSpiderInfo();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		/*try {
+			ArticleService.articleSpeed();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}*/
     }
 	
 	@PostConstruct

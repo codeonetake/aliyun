@@ -70,7 +70,7 @@
   	var option = {
 	    title: {
 	        text: '内存使用量',
-	        subtext: ''
+	        subtext: '更新时间：${lastTime}'
 	    },
 	    tooltip: {
 	        trigger: 'axis'
@@ -79,15 +79,58 @@
 	        data:['used','buff','cach','free']
 	    },
 	    grid: {
-	        left: '3%',
-	        right: '4%',
-	        bottom: '3%',
+	        left: '1%',
+	        right: '0%',
+	        bottom: '10%',
 	        containLabel: true
 	    },
 	    toolbox: {
-	        feature: {
-	            saveAsImage: {}
+	    		show : true,
+	        orient: 'horizontal',      // 布局方式，默认为水平布局，可选为：
+	        x: 'right',                // 水平安放位置，默认为全图右对齐，可选为：
+	        y: 'top',                  // 垂直安放位置，默认为全图顶端，可选为：
+	        color : ['#1e90ff','#22bb22','#4b0082','#d2691e'],
+	        backgroundColor: 'rgba(0,0,0,0)', // 工具箱背景颜色
+	        borderColor: '#ccc',       // 工具箱边框颜色
+	        borderWidth: 0,            // 工具箱边框线宽，单位px，默认为0（无边框）
+	        padding: 5,                // 工具箱内边距，单位px，默认各方向内边距为5，
+	        showTitle: true,
+	        feature : {
+	            dataZoom : {
+	                show : true,
+	                title : {
+	                    dataZoom : '区域缩放',
+	                    dataZoomReset : '区域缩放-后退'
+	                }
+	            },
+	            magicType: {
+	                show : true,
+	                title : {
+	                    line : '动态类型切换-折线图',
+	                    bar : '动态类型切换-柱形图',
+	                    stack : '动态类型切换-堆积',
+	                },
+	                type : ['line', 'bar', 'stack']
+	            },
+	            restore : {
+	                show : true,
+	                title : '还原',
+	                color : 'black'
+	            },
+	            saveAsImage : {
+	                show : true,
+	                title : '保存为图片',
+	                type : 'jpeg',
+	                lang : ['点击本地保存'] 
+	            },
 	        }
+	    },
+	    dataZoom : {
+	        show : true,
+	        realtime : true,
+	        y:320,
+	        start : 0,
+	        end : 999
 	    },
 	    xAxis: {
 	        type: 'category',
@@ -195,6 +238,7 @@
 	option = {
 	    title : {
 	        text: "内存使用率",
+	        subtext: '更新时间：${lastTime}',
 	        x:'center'
 	    },
 	    color:['#d43f3a','#2e6da4','#46b8da','#4cae4c'],

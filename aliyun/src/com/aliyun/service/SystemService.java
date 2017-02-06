@@ -1,6 +1,5 @@
 package com.aliyun.service;
 
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,7 +14,7 @@ import com.google.gson.Gson;
 
 public class SystemService {
 	
-	private static int maxCount = 288;
+	private static int maxCount = 480;
 	private static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	
 	public static void get() {
@@ -85,16 +84,11 @@ public class SystemService {
 		RedisPool.set(diskRedisKey, new Gson().toJson(diskTongji));
 	}
 	
-	public static String formatDouble(double d){
-		DecimalFormat df = new DecimalFormat("######0.00");
-		return df.format(d);
-	}
-	
 	public static String getMemory(String memory){
 		memory = memory.trim().toLowerCase();
 		String mSize = memory.substring(0,memory.length() - 1);
 		if(memory.endsWith("k")){
-			mSize = formatDouble(Double.parseDouble(mSize) / 1024);
+			mSize = NumberUtil.formatDouble(Double.parseDouble(mSize) / 1024);
 		}
 		return mSize;
 	}
@@ -103,7 +97,7 @@ public class SystemService {
 		disk = disk.trim().toLowerCase();
 		String dSize = disk.substring(0,disk.length() - 1);
 		if(disk.endsWith("g")){
-			dSize = formatDouble(Double.parseDouble(dSize) * 1024);
+			dSize = NumberUtil.formatDouble(Double.parseDouble(dSize) * 1024);
 		}
 		return dSize;
 	}

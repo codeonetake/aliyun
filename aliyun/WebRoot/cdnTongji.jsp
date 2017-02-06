@@ -106,7 +106,7 @@
 	        }
 	    ]
 	};
-	echarts.init(document.getElementById("imgCdn")).setOption(option);
+	var ec1 = echarts.init(document.getElementById("imgCdn")).setOption(option);
 	
 	option = {
 		    title: {
@@ -151,6 +151,6 @@
 		        }
 		    ]
 		};
-		echarts.init(document.getElementById("cdn")).setOption(option);
+	var ec2 = echarts.init(document.getElementById("cdn")).setOption(option);
   </script>
 </html>

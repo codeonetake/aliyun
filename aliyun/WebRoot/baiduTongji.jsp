@@ -59,6 +59,33 @@
   	<jsp:include page="temp/nav.jsp"></jsp:include>
   	<div class="container" style="width:88%;margin-top:30px">
   		<div id="baiduTongji" style="width:100%;height:350px"></div>
+  		<hr/>
+  		<code>更新时间：${baiduSpider.time}</code><br/><br/>
+  		<div class="row">
+  		<div class="col-md-6" id="spiderPan" style="width:50%;height:350px"></div>
+  		<div class="col-md-6">
+  			
+  		</div>
+  		</div>
+  		<table class="table table-bordered" style="width:100%">
+			<tr>
+				<td>ip</td>
+				<td>时间</td>
+				<td>访问的url</td>
+				<td>状态码</td>
+			</tr>
+ 			<c:forEach items="${baiduSpider.infoDetails}" var="info">
+ 			<tr>
+				<td>${info.ip}</td>
+				<td>${info.time}</td>
+				<td>${info.url}</td>
+				<td>${info.responseCode}</td>
+			</tr>
+ 			</c:forEach>
+ 		</table>
+ 		<c:forEach items="${baiduSpider.originInfo}" var="info">
+ 			<div class="alert alert-info" role="alert">${info}</div>
+ 		</c:forEach>
   	</div>
   </body>
   <script type="text/javascript">
@@ -101,5 +128,35 @@
 	    ]
 	};
 	echarts.init(document.getElementById("baiduTongji")).setOption(option);
+	
+	option = {
+	    title : {
+	        text: "IP段访问次数",
+	        subtext: '',
+	        x:'center'
+	    },
+	    legend: {
+	        orient: 'vertical',
+	        left: 'left',
+	        data: ${singleData}
+	    },
+	    series : [
+	        {
+	            name: '数据统计',
+	            type: 'pie',
+	            radius : '55%',
+	            center: ['50%', '60%'],
+	            data:${data},
+	            itemStyle: {
+	                emphasis: {
+	                    shadowBlur: 10,
+	                    shadowOffsetX: 0,
+	                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+	                }
+	            }
+	        }
+	    ]
+	};
+	echarts.init(document.getElementById('spiderPan')).setOption(option);
   </script>
 </html>

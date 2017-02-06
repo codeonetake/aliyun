@@ -326,6 +326,12 @@ public class UploadBakService {
 		}else{
 			m("没有设置nginx服务器日志路径，不备份");
 		}
+		//重新加载一下nginx的配置，使日志文件重新生成 
+		try {
+			DoShell.shell("nginx -s reload");
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
 		m("");
 		m("备份nginx服务器配置开始");
 		if(!"".equals(nginxConf)){

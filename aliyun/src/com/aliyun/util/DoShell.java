@@ -17,6 +17,9 @@ public class DoShell {
 		String line;
 		while ((line = reader.readLine()) != null) {
 			line = line.trim();
+			if(line.contains("alert()")){
+				line = line.replaceAll("alert()", "()");
+			}
 			list.add(line);
 		}
 		process.waitFor();
@@ -26,9 +29,6 @@ public class DoShell {
 		return list;
 	}
 	public static void main(String[] args) throws Exception {
-		List<String> list = shell("ls /Users/liuwenbin/Desktop/");
-		for (String string : list) {
-			System.out.println(string);
-		}
+		System.out.println(System.currentTimeMillis());
 	}
 }

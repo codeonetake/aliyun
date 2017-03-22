@@ -1,5 +1,4 @@
 <%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
-<script src="/js/fileUpload.js"></script>
 <nav class="navbar navbar-default" role="navigation">
   <div class="container-fluid">
   <div class="navbar-header">
@@ -27,8 +26,8 @@
             <li><a href="/tongji/baidu">百度统计</a></li>
             <li><a href="/tongji/system">系统统计</a></li>
             <li><a href="/tongji/log">日志统计</a></li>
-            <li><a href="/tongji/article">文章测速</a></li>
-            <li><a href="/tongji/money">财务统计</a></li>
+            <%--<li><a href="/tongji/article">文章测速</a></li>
+            --%><li><a href="/tongji/money">财务统计</a></li>
           </ul>
         </li>
       </ul>

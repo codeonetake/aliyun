@@ -3,6 +3,7 @@ package com.aliyun.controller;
 import java.io.File;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -17,8 +18,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
-import sun.management.counter.Variability;
-
 import com.aliyun.bean.BaiduDetail;
 import com.aliyun.bean.BaiduSpiderIpDetail;
 import com.aliyun.bean.BaiduSpiderTongji;
@@ -32,12 +31,13 @@ import com.aliyun.bean.LogTypeInfoTongji;
 import com.aliyun.bean.MemDetail;
 import com.aliyun.bean.MemTongji;
 import com.aliyun.bean.MoneyDetail;
+import com.aliyun.bean.MoneyMonthDetail;
+import com.aliyun.bean.MoneyMonthTongji;
 import com.aliyun.bean.MoneyTongji;
 import com.aliyun.service.LogService;
 import com.aliyun.service.MoneyService;
 import com.aliyun.service.NumberUtil;
 import com.aliyun.util.DoShell;
-import com.aliyun.util.OssConfig;
 import com.aliyun.util.RedisPool;
 import com.google.gson.Gson;
 
@@ -223,9 +223,12 @@ public class TongjiController {
 				status += "今天利息值数据<b>未提交</b>";
 			}
 			double totalUp = 0;
+			int dayCount = 0;
 			for (MoneyDetail moneyDetail : upDetails) {
+				
 				upMoney += moneyDetail.getMoney() + ",";
 				totalUp += moneyDetail.getMoney();
+				dayCount ++;
 				upTime += "'"+moneyDetail.getTime() + "',";
 			}
 			upMoney = upMoney.substring(0,upMoney.length() - 1)+"]";
@@ -233,6 +236,7 @@ public class TongjiController {
 			
 			int size = upDetails.size();
 			mav.addObject("upToday",upDetails.get(size - 1));
+			mav.addObject("dayCount",dayCount);
 			mav.addObject("upYesterday",upDetails.get(size - 2));
 			
 			mav.addObject("firstTime", upDetails.get(0).getTime());
@@ -250,6 +254,22 @@ public class TongjiController {
 		}else{
 			mav.addObject("color", "success");
 		}
+		//分析柱状图
+		String rKey = "moneyMonth";
+		String json = RedisPool.get(rKey);
+		MoneyMonthTongji moneyMonthTongji = new Gson().fromJson(json, MoneyMonthTongji.class);
+		List<MoneyMonthDetail> moneyMonthDetails = moneyMonthTongji.getDetails();
+		Collections.sort(moneyMonthDetails);
+		String legendData = "[";
+		String values = "[";
+		for (MoneyMonthDetail moneyMonthDetail : moneyMonthDetails) {
+			values += moneyMonthDetail.getMoney() + ",";
+			legendData+="'"+moneyMonthDetail.getMonth()+"',";
+		}
+		values = values.substring(0,values.length() - 1)+"]";
+		legendData = legendData.substring(0,legendData.length() - 1)+"]";
+		mav.addObject("values", values);
+		mav.addObject("legendData", legendData);
 		mav.addObject("status",status);
 		return mav;
 	}

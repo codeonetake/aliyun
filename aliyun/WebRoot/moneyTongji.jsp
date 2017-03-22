@@ -67,8 +67,9 @@
   		<hr/>
   		<div id="upMoneyTongji" style="width:100%;height:350px"></div>
   		<div id="baseMoneyTongji" style="width:100%;height:350px"></div>
+  		<div id="moneyBox" style="width:100%;height:550px"></div>
   		<hr/>
-  		截止到${firstTime}的总收益为：<b>${totalUp}</b>
+  		${firstTime}起，共${dayCount}天总收益：<b>${totalUp}</b>，平均：<b><fmt:formatNumber value="${totalUp/dayCount}" pattern="#0.00"/></b>
   		<table style="width:100%" class="table table-bordered">
   			<tr>
 	  			<td>名称</td>
@@ -125,6 +126,7 @@
 		   	 dataType : 'text',
 		     success: function (data, status){
 		    	 	$("#addMoneyPic").change(changeWeixinPic);
+		    	 	location.reload();
 		     },
 		     error: function (data, status){
 		    		//错误处理
@@ -217,6 +219,38 @@
 	    ]
 	};
 	echarts.init(document.getElementById("baseMoneyTongji")).setOption(option);
+	
+	option = {
+	    title : {
+	        text: '月度收益'
+	    },
+	    tooltip : {
+	        trigger: 'axis'
+	    },
+	    legend: {
+	        data:['收益']
+	    },
+	    calculable : true,
+	    xAxis : [
+	        {
+	            type : 'category',
+	            data : ${legendData}
+	        }
+	    ],
+	    yAxis : [
+	        {
+	            type : 'value'
+	        }
+	    ],
+	    series : [
+	        {
+	            name:'收益',
+	            type:'bar',
+	            data:${values},
+	        }
+	    ]
+	};
+	echarts.init(document.getElementById('moneyBox')).setOption(option);
   </script>
   </c:if>
 </html>

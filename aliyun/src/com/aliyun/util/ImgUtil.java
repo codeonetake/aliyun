@@ -2,22 +2,16 @@ package com.aliyun.util;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
-
-import org.jsoup.Jsoup;
 
 public class ImgUtil {
 	private final String LANG_OPTION = "-l";
@@ -44,7 +38,7 @@ public class ImgUtil {
 	private static int totalTryCount = 0;
 
 	public static String recognizeText(String PNGUrl) throws Exception {
-		System.out.println(totalTryCount);
+		/*System.out.println(totalTryCount);
 		String url = "http://www.free-ocr.com";
 		String result = WebUtils.sendPost(url,
 						"userfile=&userfile_url="
@@ -71,15 +65,12 @@ public class ImgUtil {
 		if (result.contains(",")) {
 			result = result.replaceAll(",", "");
 		}
-		return result;
-	}
-
-	public static void main(String[] args) throws Exception {
-		//System.out.println(recognizeText("http://aliyun.codeawl.com/img/1.PNG"));
-		//System.out.println(recognizeText("http://aliyun.codeawl.com/img/2.PNG"));
-		// cutCenterImage("/Users/liuwenbin/Desktop/IMG_8127.PNG",
-		// "/Users/liuwenbin/Desktop/1.PNG", 0, 200, 450, 100);
-		// cutCenterImage("/Users/liuwenbin/Desktop/IMG_8127.PNG",
-		// "/Users/liuwenbin/Desktop/2.PNG", 450, 200, 300, 100);
+		return result;*/
+		DoShell.shell("tesseract "+PNGUrl+" /root/data/ocr/ocr");
+		String num =  DoShell.shell("cat /root/data/ocr/ocr.txt").get(0);
+		if(num.contains(",")){
+			num = num.replaceAll(",", "");
+		}
+		return num;
 	}
 }

@@ -7,7 +7,6 @@ import javax.annotation.PostConstruct;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.aliyun.service.ArticleService;
 import com.aliyun.service.BaiduCountService;
 import com.aliyun.service.BaiduSpiderService;
 import com.aliyun.service.CDNCacheService;
@@ -22,6 +21,7 @@ import com.aliyun.service.SystemService;
 import com.aliyun.service.UploadBakService;
 import com.aliyun.util.ObjSave;
 import com.aliyun.util.OssConfig;
+import com.aliyun.util.RedisPool;
 
 @Component
 public class ServerTask {
@@ -117,6 +117,12 @@ public class ServerTask {
     public void getSystemTongji(){
 		try {
 			SystemService.get();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		//设置更新时间
+		try {
+			RedisPool.set("lastScheduledTime", System.currentTimeMillis() + "");
 		} catch (Exception e) {
 			// TODO: handle exception
 		}

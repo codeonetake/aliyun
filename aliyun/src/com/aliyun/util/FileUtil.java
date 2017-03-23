@@ -75,4 +75,10 @@ public class FileUtil {
 		bufferedWriter.write(content+"\r\n");
 		bufferedWriter.close();
 	}
+	
+	public static void writeNotContinue(String filePath,String content) throws Exception{
+		BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(new File(filePath)));
+		bufferedWriter.write(content);
+		bufferedWriter.close();
+	}
 }

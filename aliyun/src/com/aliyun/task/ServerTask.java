@@ -17,6 +17,7 @@ import com.aliyun.service.MipService;
 import com.aliyun.service.MoneyService;
 import com.aliyun.service.RestartTomcatService;
 import com.aliyun.service.ShellService;
+import com.aliyun.service.SiteMapService;
 import com.aliyun.service.SystemService;
 import com.aliyun.service.UploadBakService;
 import com.aliyun.util.ObjSave;
@@ -135,11 +136,8 @@ public class ServerTask {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		/*try {
-			ArticleService.articleSpeed();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}*/
+		//更新siteMap
+		SiteMapService.make();
     }
 	
 	@PostConstruct
